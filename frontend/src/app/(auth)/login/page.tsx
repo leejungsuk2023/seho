@@ -6,6 +6,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { Button, Input, Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { useLogin } from '@/lib/hooks/useAuth';
+import type { AxiosError } from 'axios';
 
 /**
  * 로그인 Form 스키마
@@ -35,6 +36,8 @@ export default function LoginPage() {
   const onSubmit = (data: LoginForm) => {
     loginMutate(data);
   };
+
+  const errorMessage = (error as AxiosError | undefined)?.response?.data as any;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -81,7 +84,7 @@ export default function LoginPage() {
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-md">
                 <p className="text-sm text-red-600">
-                  {error?.response?.data?.message || '로그인에 실패했습니다.'}
+                  {errorMessage?.message || '로그인에 실패했습니다.'}
                 </p>
               </div>
             )}

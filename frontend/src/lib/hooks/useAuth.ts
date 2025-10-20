@@ -1,6 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { register, login, RegisterData, LoginData } from '../api/auth';
+import type { AxiosError } from 'axios';
+import type { ApiResponse, AuthResponse } from '@/types';
 
 /**
  * Auth Hooks
@@ -14,7 +16,7 @@ import { register, login, RegisterData, LoginData } from '../api/auth';
 export function useRegister() {
   const router = useRouter();
 
-  return useMutation({
+  return useMutation<ApiResponse<AuthResponse>, AxiosError, RegisterData>({
     mutationFn: register,
     onSuccess: (data) => {
       // 토큰 저장
@@ -33,7 +35,7 @@ export function useRegister() {
 export function useLogin() {
   const router = useRouter();
 
-  return useMutation({
+  return useMutation<ApiResponse<AuthResponse>, AxiosError, LoginData>({
     mutationFn: login,
     onSuccess: (data) => {
       // 토큰 저장

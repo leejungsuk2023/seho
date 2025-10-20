@@ -7,6 +7,7 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { Button, Input, Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { useRegister } from '@/lib/hooks/useAuth';
+import type { AxiosError } from 'axios';
 
 /**
  * 회원가입 Form 스키마
@@ -42,6 +43,8 @@ export default function RegisterPage() {
     const { confirmPassword, ...registerData } = data;
     registerMutate(registerData);
   };
+
+  const errorMessage = (error as AxiosError | undefined)?.response?.data as any;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -95,7 +98,7 @@ export default function RegisterPage() {
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-md">
                 <p className="text-sm text-red-600">
-                  {error?.response?.data?.message || '회원가입에 실패했습니다.'}
+                  {errorMessage?.message || '회원가입에 실패했습니다.'}
                 </p>
               </div>
             )}

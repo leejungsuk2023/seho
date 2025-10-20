@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: seho-postgres
+    restart: unless-stopped
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: seho
+      POSTGRES_PASSWORD: seho_password
+      POSTGRES_DB: seho
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - seho-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: seho-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - seho-network
+
+  # Backend (uncomment when ready)
+  # backend:
+  #   build:
+  #     context: ./backend
+  #     dockerfile: Dockerfile
+  #   container_name: seho-backend
+  #   restart: unless-stopped
+  #   ports:
+  #     - '3001:3001'
+  #   environment:
+  #     - NODE_ENV=development
+  #     - DATABASE_URL=postgresql://seho:seho_password@postgres:5432/seho
+  #     - REDIS_HOST=redis
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #   volumes:
+  #     - ./backend:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - seho-network
+
+  # Frontend (uncomment when ready)
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: seho-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - '3000:3000'
+  #   environment:
+  #     - NEXT_PUBLIC_API_URL=http://localhost:3001
+  #   depends_on:
+  #     - backend
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #     - /app/.next
+  #   networks:
+  #     - seho-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  seho-network:
+    driver: bridge
+

@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "framework": "nextjs",
+  "buildCommand": "cd frontend && npm ci && npm run build",
+  "installCommand": "cd frontend && npm ci",
+  "outputDirectory": "frontend/.next",
+  "github": {
+    "enabled": true,
+    "silent": false
+  },
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD frontend/ || exit 1"
+}

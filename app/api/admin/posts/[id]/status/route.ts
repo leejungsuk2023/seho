@@ -8,7 +8,7 @@ import { canManageUsers } from "@/lib/auth/permissions"
 
 const bodySchema = z.object({
   status: z.nativeEnum(PostStatus, {
-    errorMap: () => ({ message: "지원하지 않는 상태입니다." }),
+    message: "지원하지 않는 상태입니다.",
   }),
 })
 

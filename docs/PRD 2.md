@@ -381,60 +381,21 @@
 - **우선순위**: Medium
 - **의존성**: 3.4 댓글 시스템
 
-#### 3.6.5 블로그 디자인 및 이미지 관리
-- **개요**: 블로그별 비주얼 요소 및 메타데이터 관리
+#### 3.6.5 블로그/카테고리 관리
+- **개요**: 블로그 메타데이터 및 카테고리 관리
 - **User Story**:
-  - "관리자로서, Studio CPA의 커버 이미지와 로고를 변경하고 싶다"
-  - "관리자로서, Serein Cafe의 테마 색상을 변경하고 싶다"
-  - "관리자로서, 각 블로그에 새 카테고리를 추가하고 싶다"
+  - "관리자로서, Studio CPA에 새 카테고리 'Interview'를 추가하고 싶다"
 - **상세 명세**:
   - 경로: `/admin/blogs`
-
-  - **블로그 기본 정보 관리**:
-    - 블로그 이름 수정
-    - 설명(description) 수정
-    - 가시성 토글 (visibility) - 블로그 숨김/공개
-    - slug 변경 (주의: URL 변경됨)
-
-  - **이미지 관리**:
-    - **커버 이미지**: 블로그 홈 상단 배경 이미지
-      - 이미지 URL 입력 또는 파일 업로드
-      - 미리보기 제공
-      - 권장 크기: 1920x600px
-    - **로고 이미지**: 블로그 헤더에 표시되는 로고
-      - 이미지 URL 입력 또는 파일 업로드
-      - 권장 크기: 200x200px (투명 배경 PNG)
-    - **썸네일**: 블로그 인덱스 카드에 표시
-      - 권장 크기: 800x500px
-    - 이미지 업로드 방식:
-      - MVP: 외부 이미지 URL 입력
-      - v1.0 이후: 직접 업로드 (S3/Cloudinary)
-
-  - **디자인 커스터마이징**:
-    - **테마 색상 (Primary Color)**:
-      - 색상 피커로 선택
-      - 블로그 특정 요소(버튼, 링크, 강조 등)에 적용
-    - **폰트 선택**:
-      - 제목 폰트 (Heading Font)
-      - 본문 폰트 (Body Font)
-      - 미리 정의된 폰트 목록에서 선택
-    - **레이아웃 옵션**:
-      - 포스트 카드 스타일 (그리드/리스트)
-      - 사이드바 위치 (왼쪽/오른쪽/없음)
-
-  - **카테고리 CRUD**:
+  - 블로그 관리:
+    - 이름, 설명 수정
+    - 가시성 토글 (visibility)
+    - 커버 이미지 URL 수정
+  - 카테고리 CRUD:
     - 블로그별 카테고리 목록
-    - 카테고리 추가/수정/삭제
+    - 추가/수정/삭제
     - slug 자동 생성 (name → slug)
-    - 카테고리 순서 변경 (드래그 앤 드롭)
-
-  - **UI 구성**:
-    - 3개 블로그 탭 (Serein Cafe, Studio CPA, Swing Company)
-    - 각 탭에 해당 블로그 설정 폼 표시
-    - 실시간 미리보기 패널 (옵션)
-    - "변경사항 저장" 버튼
-
-- **우선순위**: High
+- **우선순위**: Medium
 - **의존성**: 3.2 블로그 시스템
 
 ---
@@ -498,28 +459,14 @@ enum Role { ADMIN WRITER USER }
 ### 4.2 Blog (블로그)
 ```prisma
 model Blog {
-  id              String     @id @default(cuid())
-  slug            String     @unique
-  name            String
-  description     String?
-  visibility      Boolean    @default(true)
-
-  // 이미지
-  coverImageUrl   String?    // 커버 이미지 (1920x600px)
-  logoImageUrl    String?    // 로고 (200x200px)
-  thumbnailUrl    String?    // 썸네일 (800x500px)
-
-  // 디자인 커스터마이징
-  primaryColor    String?    @default("#3B82F6") // Hex 색상 코드
-  headingFont     String?    @default("Inter")
-  bodyFont        String?    @default("Inter")
-  layoutStyle     String?    @default("grid") // "grid" | "list"
-  sidebarPosition String?    @default("right") // "left" | "right" | "none"
-
-  categories      Category[]
-  posts           Post[]
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  name        String
+  description String?
+  visibility  Boolean    @default(true)
+  categories  Category[]
+  posts       Post[]
+  createdAt   DateTime   @default(now())
 }
 ```
 
@@ -647,19 +594,12 @@ model PasswordResetToken {
 | PATCH | `/api/comments/[id]` | 댓글 수정 | 작성자 |
 | DELETE | `/api/comments/[id]` | 댓글 삭제 | 작성자 or ADMIN |
 
-### 5.4 블로그 API
-| Method | Endpoint | 설명 | 권한 |
-|--------|----------|------|------|
-| GET | `/api/blogs` | 블로그 목록 | Public |
-| GET | `/api/blogs/[slug]` | 블로그 상세 (설정 포함) | Public |
-| PATCH | `/api/blogs/[id]` | 블로그 설정 업데이트 (이미지, 디자인) | ADMIN |
-
-### 5.5 검색 API
+### 5.4 검색 API
 | Method | Endpoint | 설명 | 권한 |
 |--------|----------|------|------|
 | GET | `/api/search?q=keyword` | 포스트 검색 | Public |
 
-### 5.6 관리자 API
+### 5.5 관리자 API
 | Method | Endpoint | 설명 | 권한 |
 |--------|----------|------|------|
 | PATCH | `/api/admin/users/[id]/role` | 역할 변경 | ADMIN |

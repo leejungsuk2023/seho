@@ -49,10 +49,10 @@ services:
   #   networks:
   #     - seho-network
 
-  # Frontend (uncomment when ready)
+  # Frontend (uncomment when containerizing Next.js 앱)
   # frontend:
   #   build:
-  #     context: ./frontend
+  #     context: .
   #     dockerfile: Dockerfile
   #   container_name: seho-frontend
   #   restart: unless-stopped
@@ -63,7 +63,7 @@ services:
   #   depends_on:
   #     - backend
   #   volumes:
-  #     - ./frontend:/app
+  #     - .:/app
   #     - /app/node_modules
   #     - /app/.next
   #   networks:
@@ -78,4 +78,3 @@ volumes:
 networks:
   seho-network:
     driver: bridge
-

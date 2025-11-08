@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/suwipachutasripanich/Library/**)",
+      "Bash(rm \"6e6effc5-c57c-4c89-9ce6-e0356fd504d6%2FPRD_(%ED%86%B5%ED%95%A9_%EC%9A%94%EA%B5%AC%EC%82%AC%ED%95%AD_%EC%A0%95%EC%9D%98%EC%84%9C).pdf\" \"802764e0-4946-443f-899f-da34bf2f0cb2%2F%ED%96%A5%ED%9B%84_%EA%B0%9C%EB%B0%9C_%EB%A1%9C%EB%93%9C%EB%A7%B5_(Future_Development_Roadmap).pdf\" \"8c5e749c-3e5f-4bff-9cc8-8f04a4b21581%2FREADME_%EC%B7%A8%ED%96%A5_%EA%B3%B5%EB%8F%99%EC%B2%B4%EB%A5%BC_%EC%9C%84%ED%95%9C_%EB%B3%B5%ED%95%A9_%EB%AC%B8%ED%99%94_%ED%94%8C%EB%9E%AB%ED%8F%BC.pdf\" \"세호 홈페이지 Mvp 패키지 V1.pdf\")",
+      "Bash(npm install)",
+      "Bash(cd /Users/suwipachutasripanich/Library/Mobile Documents/com~apple~CloudDocs/seho)",
+      "Bash(cd /Users/suwipachutasripanich/Library/Mobile Documents/com~apple~CloudDocs/seho/frontend)",
+      "Bash(npm run dev)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

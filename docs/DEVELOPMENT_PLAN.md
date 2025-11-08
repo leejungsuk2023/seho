@@ -1,427 +1,514 @@
-# 개발 계획서 (Development Plan)
-# 세호 (SEHO) - MVP v0.1
+# SEHO 블로그 플랫폼 개발 계획서
+## MVP v0.1 개발 로드맵
 
-## 버전 정보
-- **대상 버전**: MVP v0.1
-- **계획 작성일**: 2025-01-19
-- **목표 완료일**: 2025-04-19 (3개월)
-- **개발 방법론**: Document-Driven Development (DDD)
-
----
-
-## 개발 목표
-
-### 주요 목표
-1. **핵심 기능 구현**: 취향 기반 커뮤니티 플랫폼의 필수 기능 완성
-2. **사용 가능한 MVP**: 실제 사용자가 서비스를 이용할 수 있는 수준의 완성도
-3. **확장 가능한 구조**: 향후 기능 추가를 고려한 아키텍처 설계
-
-### 개발 범위
-- ✅ 사용자 인증 및 프로필 관리
-- ✅ 커뮤니티 생성 및 참여
-- ✅ 게시글 작성 및 상호작용
-- ✅ 문화 이벤트 정보 등록 및 조회
-- ⚠️ 맞춤 추천 (간단한 버전, 고도화는 v1.0에서)
-
-### 제외 범위 (MVP 이후)
-- ❌ 실시간 채팅
-- ❌ 결제 시스템
-- ❌ 오프라인 모임 기능
-- ❌ 네이티브 모바일 앱
-- ❌ 고급 AI 추천 알고리즘
+**문서 목적**: 세호(SEHO) MVP v0.1을 출시하기 위한 개발 원칙, 마일스톤, 작업 세부 내용을 단일 문서로 관리합니다.  
+**프로젝트**: 세호 (SEHO) - 3개의 블로그 공간 플랫폼  
+**버전**: MVP v0.1  
+**작성일**: 2025-10-20  
+**최종 업데이트**: 2025-10-20
 
 ---
 
-## 작업 항목 (Task Breakdown)
-
-### Phase 1: 프로젝트 초기 설정 (1주차)
-
-| Task ID | 작업명 | 상세 설명 | 우선순위 | 예상 시간 | 상태 | 비고 |
-|---------|--------|-----------|----------|-----------|------|------|
-| T-001 | 프로젝트 구조 설정 | 폴더 구조, Git 설정, 환경 변수 | Critical | 4h | TODO | |
-| T-002 | Frontend 초기 설정 | Next.js 프로젝트 생성, 라이브러리 설치 | Critical | 4h | TODO | |
-| T-003 | Backend 초기 설정 | NestJS 프로젝트 생성, 기본 구조 | Critical | 4h | TODO | |
-| T-004 | Database 설정 | PostgreSQL 설치, Prisma ORM 설정 | Critical | 4h | TODO | |
-| T-005 | 디자인 시스템 구축 | 컬러, 타이포그래피, 기본 컴포넌트 | High | 8h | TODO | Tailwind CSS |
-| T-006 | CI/CD 파이프라인 설정 | GitHub Actions 설정 | Medium | 4h | TODO | |
-
-**Phase 1 총 예상 시간**: 28시간 (약 1주)
+## 📋 목차
+1. [현재 상태 요약](#현재-상태-요약)
+2. [개발 원칙](#개발-원칙)
+3. [마일스톤 개요](#마일스톤-개요)
+4. [Phase / 마일스톤 상세](#phase--마일스톤-상세)
+5. [진행 관리 제안](#진행-관리-제안)
+6. [리스크 관리](#리스크-관리)
+7. [다음 단계 (v1.0 이후)](#다음-단계-v10-이후)
 
 ---
 
-### Phase 2: 사용자 인증 시스템 (2주차)
-
-| Task ID | 작업명 | 상세 설명 | 우선순위 | 예상 시간 | 상태 | 비고 |
-|---------|--------|-----------|----------|-----------|------|------|
-| T-101 | DB 스키마 생성 | users, sessions 테이블 생성 | Critical | 2h | TODO | Prisma migration |
-| T-102 | 회원가입 API | POST /api/auth/register | Critical | 6h | TODO | bcrypt 암호화 |
-| T-103 | 로그인 API | POST /api/auth/login | Critical | 4h | TODO | JWT 토큰 발급 |
-| T-104 | 이메일 인증 | 이메일 발송, 인증 토큰 검증 | High | 6h | TODO | SendGrid/AWS SES |
-| T-105 | 비밀번호 재설정 | 비밀번호 찾기 기능 | Medium | 4h | TODO | |
-| T-106 | 소셜 로그인 (Google) | Google OAuth 연동 | High | 6h | TODO | Passport.js |
-| T-107 | 소셜 로그인 (Kakao) | Kakao OAuth 연동 | High | 6h | TODO | |
-| T-108 | 회원가입 UI | 회원가입 폼, 유효성 검사 | Critical | 8h | TODO | React Hook Form |
-| T-109 | 로그인 UI | 로그인 폼, 소셜 로그인 버튼 | Critical | 6h | TODO | |
-| T-110 | 인증 미들웨어 | JWT 검증, 라우트 보호 | Critical | 4h | TODO | |
-
-**Phase 2 총 예상 시간**: 52시간 (약 1.5주)
+## 현재 상태 요약
+- Next.js 기반 퍼블릭 화면(홈, 블로그 상세, On Air)과 공용 레이아웃/버튼 컴포넌트가 구현된 상태입니다.
+- 블로그/포스트 데이터는 Prisma 기반 API로 제공되며, 쓰기 기능(작성·수정·삭제)과 댓글·검색 기능이 구현된 상태입니다.
+- 메인/On Air/블로그/포스트 화면이 최신 UI 가이드(미니멀, 색상, 타이포그래피)에 맞게 개편되었습니다.
+- Auth.js(NextAuth) 기반 이메일/비밀번호 인증, 프로필 API 및 보호 라우트가 구현되어 있습니다.
+- 관리자 사용자 목록/역할 변경 API와 기본 UI가 구축되어 있으며, 역할 이력 조회는 추후 확장 예정입니다.
+- 프로젝트 구조는 단일 Next.js 애플리케이션으로 통합됐으며 `backend/` 폴더는 참고용 아카이브로 유지중입니다.
+- Tailwind CSS 4, ESLint/Prettier 등 기본 개발 환경이 세팅되어 있으며 pnpm 기반 스크립트로 통일했습니다.
 
 ---
 
-### Phase 3: 프로필 관리 (3주차)
+## 개발 원칙
 
-| Task ID | 작업명 | 상세 설명 | 우선순위 | 예상 시간 | 상태 | 비고 |
-|---------|--------|-----------|----------|-----------|------|------|
-| T-201 | DB 스키마 확장 | tags, user_tags, interests 테이블 | Critical | 3h | TODO | |
-| T-202 | 프로필 조회 API | GET /api/users/:userId | Critical | 4h | TODO | |
-| T-203 | 프로필 수정 API | PATCH /api/users/:userId | Critical | 4h | TODO | |
-| T-204 | 태그 관리 API | GET/POST tags, user_tags | High | 6h | TODO | |
-| T-205 | 관심사 관리 API | GET/PUT user_interests | High | 4h | TODO | |
-| T-206 | 이미지 업로드 | S3 업로드, 프로필 이미지 처리 | High | 8h | TODO | AWS S3/Multer |
-| T-207 | 프로필 UI | 프로필 보기 화면 | Critical | 8h | TODO | |
-| T-208 | 프로필 편집 UI | 편집 폼, 이미지 업로드 | Critical | 10h | TODO | |
-| T-209 | 태그 선택 UI | 태그 검색 및 선택 컴포넌트 | High | 8h | TODO | Multi-select |
-| T-210 | 관심사 선택 UI | 카테고리 선택 화면 | High | 6h | TODO | |
+### 1. MVP First
+- 핵심 기능에 집중 (3개 블로그, 포스트, 댓글, 관리자)
+- 부가 기능은 v1.0 이후로 연기 (소셜 로그인, 이미지 업로드, 알림 등)
 
-**Phase 3 총 예상 시간**: 61시간 (약 2주)
+### 2. 단일 프로젝트 구조
+- NestJS 백엔드 제거, Next.js 단일 프로젝트로 통합
+- API Routes (Route Handlers) 사용
+- Next.js 앱이 리포지토리 루트에 위치
 
----
+### 3. 점진적 개발
+- 각 Phase 완료 후 기능 테스트
+- Phase 간 명확한 의존성 관리
+- 매 Phase 종료 시 배포 가능한 상태 유지
 
-### Phase 4: 커뮤니티 기능 (4-5주차)
-
-| Task ID | 작업명 | 상세 설명 | 우선순위 | 예상 시간 | 상태 | 비고 |
-|---------|--------|-----------|----------|-----------|------|------|
-| T-301 | DB 스키마 생성 | communities, memberships, community_tags | Critical | 3h | TODO | |
-| T-302 | 커뮤니티 생성 API | POST /api/communities | Critical | 6h | TODO | |
-| T-303 | 커뮤니티 목록 API | GET /api/communities (페이지네이션) | Critical | 6h | TODO | |
-| T-304 | 커뮤니티 상세 API | GET /api/communities/:id | Critical | 4h | TODO | |
-| T-305 | 커뮤니티 가입/탈퇴 API | POST/DELETE join/leave | Critical | 6h | TODO | |
-| T-306 | 커뮤니티 검색 API | 검색, 필터링, 정렬 | High | 8h | TODO | Full-text search |
-| T-307 | 멤버 관리 API | 멤버 목록, 역할 변경 | Medium | 6h | TODO | |
-| T-308 | 커뮤니티 목록 UI | 카드 그리드, 필터, 검색 | Critical | 12h | TODO | |
-| T-309 | 커뮤니티 생성 UI | 생성 폼, 이미지 업로드 | Critical | 10h | TODO | |
-| T-310 | 커뮤니티 상세 UI | 상세 정보, 멤버 목록 | Critical | 12h | TODO | |
-| T-311 | 가입/탈퇴 UI | 가입 버튼, 확인 모달 | High | 4h | TODO | |
-
-**Phase 4 총 예상 시간**: 77시간 (약 2.5주)
+### 4. 문서 우선
+- 코드 작성 전 API 명세 확정
+- 컴포넌트 설계 문서화
+- 변경사항 즉시 문서 업데이트
 
 ---
 
-### Phase 5: 게시글 및 댓글 (6-7주차)
+## 마일스톤 개요
 
-| Task ID | 작업명 | 상세 설명 | 우선순위 | 예상 시간 | 상태 | 비고 |
-|---------|--------|-----------|----------|-----------|------|------|
-| T-401 | DB 스키마 생성 | posts, comments, likes, bookmarks | Critical | 3h | TODO | |
-| T-402 | 게시글 CRUD API | 생성, 조회, 수정, 삭제 | Critical | 10h | TODO | |
-| T-403 | 게시글 목록 API | 커뮤니티별 게시글 목록 | Critical | 6h | TODO | |
-| T-404 | 댓글 CRUD API | 댓글, 대댓글 처리 | Critical | 10h | TODO | |
-| T-405 | 좋아요 API | 좋아요/취소 (posts, comments) | High | 6h | TODO | |
-| T-406 | 북마크 API | 북마크/취소 | High | 4h | TODO | |
-| T-407 | 이미지 업로드 | 게시글 이미지 다중 업로드 | High | 6h | TODO | |
-| T-408 | 게시글 작성 UI | 에디터, 이미지 업로드 | Critical | 12h | TODO | Draft.js/Quill |
-| T-409 | 게시글 목록 UI | 피드 형식, 무한 스크롤 | Critical | 10h | TODO | |
-| T-410 | 게시글 상세 UI | 상세 보기, 댓글 영역 | Critical | 12h | TODO | |
-| T-411 | 댓글 UI | 댓글 입력, 대댓글, 수정/삭제 | Critical | 12h | TODO | |
-| T-412 | 좋아요/북마크 UI | 버튼, 애니메이션 | Medium | 6h | TODO | |
+| 번호 | 마일스톤(Phase) | 핵심 목표 | 주요 산출물 |
+|------|-----------------|-----------|-------------|
+| M0 / Phase 0 | 프로젝트 재정비 | 단일 Next.js 프로젝트 기반 정리 | 통합된 폴더 구조, Tailwind/ESLint 설정, pnpm 스크립트 |
+| M1 / Phase 1 | 인증 시스템 | 이메일/비밀번호 회원가입·로그인 플로우 완성 | Auth.js 설정, 가입/로그인 API, 프로필 기초 |
+| M2 / Phase 2 | 역할 및 권한 | ADMIN/WRITER/USER 권한 제어 | 권한 체크 로직, 관리자 UI 기초, 역할 변경 API |
+| M3 / Phase 3 | 블로그·포스트 | 블로그 피드와 포스트 CRUD, On Air 통합 | 포스트 목록/상세/작성 UI·API, 블로그 관리 |
+| M4 / Phase 4 | 댓글 & 상호작용 | 댓글 CRUD와 사용자 활동 보기 | 댓글 API/UI, 본인 권한 체크, 활동 피드 |
+| M5 / Phase 5 | 관리자 & 모더레이션 | 관리자 대시보드 및 모더레이션 기능 | 사용자/포스트/댓글 관리 화면, KPI 카드 |
+| M6 / Phase 6-8 | 품질 보강 & 배포 | 테스트, 접근성, 배포 준비 | 테스트 스위트, 접근성 개선, Vercel 배포 |
 
-**Phase 5 총 예상 시간**: 97시간 (약 3주)
+> 참고: 본 문서는 기존 Phase 0~8 구조를 유지하되, 상위 마일스톤과의 매핑을 위 표에서 제공하여 전체 흐름을 한눈에 파악할 수 있도록 합니다.
 
 ---
 
-### Phase 6: 문화 이벤트 (8주차)
+## Phase / 마일스톤 상세
 
-| Task ID | 작업명 | 상세 설명 | 우선순위 | 예상 시간 | 상태 | 비고 |
-|---------|--------|-----------|----------|-----------|------|------|
-| T-501 | DB 스키마 생성 | events, event_bookmarks | Critical | 2h | TODO | |
-| T-502 | 이벤트 CRUD API | 생성, 조회, 수정, 삭제 | Critical | 10h | TODO | |
-| T-503 | 이벤트 목록 API | 필터링, 검색, 정렬 | Critical | 8h | TODO | |
-| T-504 | 이벤트 북마크 API | 북마크/취소 | High | 4h | TODO | |
-| T-505 | 이벤트 등록 UI | 관리자/사용자 등록 폼 | Critical | 12h | TODO | |
-| T-506 | 이벤트 목록 UI | 카드 그리드, 필터 | Critical | 10h | TODO | |
-| T-507 | 이벤트 상세 UI | 상세 정보, 지도, 북마크 | Critical | 12h | TODO | Google Maps API |
-| T-508 | 이벤트 검색 UI | 검색 바, 필터 옵션 | High | 8h | TODO | |
+### Phase 0: 프로젝트 초기화 ✅
+**목표**: 개발 환경 구성 및 기본 구조 셋업
 
-**Phase 6 총 예상 시간**: 66시간 (약 2주)
+**주요 작업**:
+- [x] 기존 backend/ 폴더 제거 결정
+- [x] Next.js 앱을 루트로 통합 (기존 `frontend/` 자산 정리)
+- [x] Tailwind CSS 4 설정
+- [x] ESLint, Prettier 설정
+- [x] Prisma 설정 및 초기 스키마 작성
+- [x] 데이터베이스 마이그레이션 (3개 블로그 시드 데이터)
+- [ ] GitHub repository 정리 (불필요한 PDF 삭제 완료)
 
----
-
-### Phase 7: 홈 및 탐색 (9주차)
-
-| Task ID | 작업명 | 상세 설명 | 우선순위 | 예상 시간 | 상태 | 비고 |
-|---------|--------|-----------|----------|-----------|------|------|
-| T-601 | 홈 피드 API | 맞춤 추천 게시글 | High | 8h | TODO | 간단한 알고리즘 |
-| T-602 | 홈 UI | 피드, 추천 커뮤니티, 이벤트 | Critical | 12h | TODO | |
-| T-603 | 탐색 UI | 커뮤니티/이벤트 탐색 | Critical | 10h | TODO | |
-| T-604 | 네비게이션 UI | 상단바, 사이드바, 하단바 | Critical | 10h | TODO | 반응형 |
-| T-605 | 검색 기능 | 통합 검색 (커뮤니티, 게시글, 이벤트) | High | 12h | TODO | Elasticsearch |
-| T-606 | 알림 UI | 알림 목록, 실시간 표시 | Medium | 8h | TODO | |
-
-**Phase 7 총 예상 시간**: 60시간 (약 2주)
+**완료 기준**:
+- `pnpm dev` 실행 시 Next.js 개발 서버 정상 구동
+- Prisma Studio로 DB 접속 및 3개 블로그 데이터 확인
+- Tailwind CSS 적용 확인
 
 ---
 
-### Phase 8: 테스트 및 최적화 (10-11주차)
+### Phase 1: 인증 시스템
+**목표**: 사용자 회원가입/로그인 구현
 
-| Task ID | 작업명 | 상세 설명 | 우선순위 | 예상 시간 | 상태 | 비고 |
-|---------|--------|-----------|----------|-----------|------|------|
-| T-701 | Unit 테스트 | API 엔드포인트 테스트 | High | 20h | TODO | Jest |
-| T-702 | Integration 테스트 | 주요 플로우 테스트 | High | 16h | TODO | |
-| T-703 | E2E 테스트 | 사용자 시나리오 테스트 | Medium | 16h | TODO | Playwright/Cypress |
-| T-704 | 성능 최적화 | 쿼리 최적화, 캐싱 | High | 12h | TODO | Redis |
-| T-705 | 이미지 최적화 | WebP 변환, Lazy Loading | Medium | 8h | TODO | |
-| T-706 | SEO 최적화 | 메타 태그, sitemap | Medium | 8h | TODO | |
-| T-707 | 반응형 디자인 점검 | Mobile, Tablet, Desktop | High | 12h | TODO | |
-| T-708 | 접근성 개선 | WCAG 준수, 스크린 리더 | Medium | 8h | TODO | |
-| T-709 | 버그 수정 | 테스트 중 발견된 버그 | High | 20h | TODO | |
+#### 1.1 Auth.js 설정
+- [x] Auth.js(NextAuth) 설치 및 기본 설정
+- [x] Credentials Provider 구성
+- [x] JWT 전략 설정
+- [x] Session 관리
 
-**Phase 8 총 예상 시간**: 120시간 (약 4주)
+#### 1.2 회원가입 기능
+- [x] 회원가입 UI (`/auth/sign-up`)
+  - 이메일, 비밀번호, 닉네임 입력 폼
+  - React Hook Form + Zod 검증
+- [x] 회원가입 API (`POST /api/auth/signup`)
+  - 이메일 중복 체크
+  - 비밀번호 bcrypt 암호화
+  - User 생성 (기본 role: USER)
+- [x] 비밀번호 강도 검증 (최소 8자, 영문+숫자)
 
----
+#### 1.3 로그인 기능
+- [x] 로그인 UI (`/auth/sign-in`)
+- [x] 로그인 API (Auth.js 통합)
+- [x] 세션 유지 및 토큰 갱신
+- [x] 보호된 라우트 미들웨어 (`middleware.ts`)
 
-### Phase 9: 배포 및 모니터링 (12주차)
+#### 1.4 프로필 기본 기능
+- [x] 프로필 조회 API (`GET /api/users/[id]`)
+- [x] 프로필 수정 API (`PATCH /api/users/[id]`)
+- [x] 프로필 페이지 UI (`/profile`)
 
-| Task ID | 작업명 | 상세 설명 | 우선순위 | 예상 시간 | 상태 | 비고 |
-|---------|--------|-----------|----------|-----------|------|------|
-| T-801 | 프로덕션 환경 설정 | AWS/Vercel 설정 | Critical | 8h | TODO | |
-| T-802 | 도메인 및 SSL | 도메인 연결, HTTPS 설정 | Critical | 4h | TODO | |
-| T-803 | Database 마이그레이션 | 프로덕션 DB 설정 | Critical | 6h | TODO | |
-| T-804 | 모니터링 설정 | Sentry, Google Analytics | High | 6h | TODO | |
-| T-805 | 로깅 시스템 | 에러 로깅, 사용자 행동 로그 | Medium | 6h | TODO | |
-| T-806 | 백업 시스템 | DB 백업 자동화 | Medium | 4h | TODO | |
-| T-807 | 프로덕션 배포 | 최종 배포 및 검증 | Critical | 8h | TODO | |
-| T-808 | 사용자 가이드 작성 | 서비스 이용 가이드 | Medium | 8h | TODO | |
+**완료 기준**:
+- 회원가입 → 로그인 → 프로필 조회 플로우 동작
+- 로그인 없이 보호된 페이지 접근 시 로그인 페이지로 리다이렉트
+- 세션 유지 (새로고침 해도 로그인 상태 유지)
 
-**Phase 9 총 예상 시간**: 50시간 (약 1.5주)
-
----
-
-## 마일스톤 (Milestones)
-
-| 마일스톤 | 목표 날짜 | 완료 조건 | 상태 |
-|---------|----------|----------|------|
-| M1: 프로젝트 초기화 완료 | 2025-01-26 | Phase 1 모든 Task 완료 | ⏳ Pending |
-| M2: 인증 시스템 완료 | 2025-02-09 | 회원가입/로그인 작동 | ⏳ Pending |
-| M3: 커뮤니티 기능 완료 | 2025-03-02 | 커뮤니티 생성/가입 가능 | ⏳ Pending |
-| M4: 게시글 기능 완료 | 2025-03-23 | 게시글 작성/댓글 작동 | ⏳ Pending |
-| M5: 이벤트 기능 완료 | 2025-03-30 | 이벤트 등록/조회 가능 | ⏳ Pending |
-| M6: MVP 기능 완성 | 2025-04-06 | 모든 핵심 기능 작동 | ⏳ Pending |
-| M7: 테스트 완료 | 2025-04-13 | 모든 테스트 통과 | ⏳ Pending |
-| M8: 프로덕션 배포 | 2025-04-19 | 서비스 정식 오픈 | ⏳ Pending |
+**예상 시간**: 40시간
 
 ---
 
-## 기술 스택 (Tech Stack)
+### Phase 2: 역할 및 권한 시스템
+**목표**: 3단계 역할(ADMIN, WRITER, USER) 구현 및 권한 제어
 
-### Frontend
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: Zustand
-- **Data Fetching**: React Query (TanStack Query)
-- **Forms**: React Hook Form + Zod
-- **UI Components**: shadcn/ui
-- **Icons**: Lucide React
+#### 2.1 역할 관리 API
+- [x] 사용자 목록 API (`GET /api/admin/users`)
+  - page/limit 페이지네이션 + role 필터 + 검색(이메일/닉네임)
+  - 응답 필드: id, email, nickname, role, createdAt, updatedAt, postCount, commentCount
+- [x] 역할 변경 API (`PATCH /api/admin/users/[id]/role`)
+  - ADMIN만 접근 가능, 동일 역할로 변경 시 예외 처리
+  - RoleHistory 로그 작성(변경자, 변경 사유 optional)
+- [ ] 역할 변경 이력 조회 API (`GET /api/admin/users/[id]/role-history`) *(선택)*
 
-### Backend
-- **Framework**: NestJS
-- **Language**: TypeScript
-- **Database**: PostgreSQL 15
-- **ORM**: Prisma
-- **Authentication**: Passport.js + JWT
-- **Validation**: class-validator
-- **API Documentation**: Swagger
+#### 2.2 권한 가드 구현
+- [x] 서버 권한 유틸 (`lib/auth/permissions.ts`)
+  - `canManageUsers`, `canEditPost(user, post)`, `canWriteToBlog(user, blogSlug)` 등 함수화
+- [x] 클라이언트 권한 가드 컴포넌트
+  - `<RequireRole roles={['ADMIN']}>`, `<RequireWriter blogSlug="...">` 등
+- [x] 미들웨어 보강
+  - `/admin` 하위 라우트에서 권한 부족 시 전용 403 페이지
+  - `/blogs/[slug]/write`, `/blogs/[slug]/edit/[id]` 등 WRITER 이상만 접근 허용
 
-### Infrastructure
-- **Hosting (Frontend)**: Vercel
-- **Hosting (Backend)**: AWS EC2 / Railway
-- **Database**: AWS RDS / Supabase
-- **File Storage**: AWS S3 / Cloudinary
-- **Cache**: Redis
-- **CI/CD**: GitHub Actions
+#### 2.3 관리자 UI 기초
+- [x] 관리자 레이아웃 (`/admin/layout.tsx`)
+  - Sidebar: Dashboard, Users, Posts, Comments, Blogs
+  - 현재 로그인 관리자 정보/로그아웃 버튼
+- [x] 사용자 관리 페이지 (`/admin/users/page.tsx`)
+  - 서버 컴포넌트에서 사용자 목록 fetch → 클라이언트 테이블 전달
+  - 역할 변경 드롭다운 + 토스트 피드백
+  - 검색 바, 역할 필터, 페이지네이션 UI
+- [x] 접근 제어 UX
+  - 비로그인 → 로그인 페이지 리다이렉트
+  - 권한 부족 → 안내 메시지 + 홈으로 이동 버튼
 
-### Development Tools
-- **Version Control**: Git + GitHub
-- **Package Manager**: pnpm
-- **Code Quality**: ESLint + Prettier
-- **Testing**: Jest + Playwright
-- **Monitoring**: Sentry + Google Analytics
+**완료 기준**:
+- ADMIN이 사용자를 WRITER로 승급 가능
+- ADMIN이 관리자 대시보드 조회 가능
+- USER와 WRITER가 `/admin` 접근 시 403 에러
 
----
-
-## 리스크 및 대응 방안
-
-### 기술적 리스크
-
-| 리스크 | 발생 가능성 | 영향도 | 대응 방안 |
-|--------|-----------|--------|----------|
-| 데이터베이스 스키마 변경 필요 | Medium | High | Prisma 마이그레이션으로 버전 관리 |
-| 성능 이슈 (대용량 트래픽) | Low | High | 초기는 캐싱으로 대응, 이후 확장 |
-| 소셜 로그인 API 변경 | Low | Medium | 추상화 레이어로 분리 설계 |
-| 이미지 업로드 용량 문제 | Medium | Medium | 클라이언트 측 압축, CDN 활용 |
-| 보안 취약점 | Medium | Critical | 정기적인 보안 점검, 업데이트 |
-
-### 일정 리스크
-
-| 리스크 | 발생 가능성 | 영향도 | 대응 방안 |
-|--------|-----------|--------|----------|
-| 예상보다 긴 개발 시간 | High | High | 우선순위 낮은 기능 다음 버전으로 연기 |
-| 예상치 못한 버그 | High | Medium | 충분한 테스트 기간 확보 |
-| 기술 학습 곡선 | Medium | Medium | 사전 학습, 문서화 충실 |
-| 리소스 부족 | Medium | High | 외부 라이브러리 적극 활용 |
-
-### 비즈니스 리스크
-
-| 리스크 | 발생 가능성 | 영향도 | 대응 방안 |
-|--------|-----------|--------|----------|
-| 사용자 피드백 반영 필요 | High | Medium | 베타 테스트 기간 확보 |
-| 경쟁 서비스 출현 | Medium | Medium | 차별화 포인트 강화 |
-| 초기 사용자 확보 어려움 | High | High | 마케팅 전략 수립, 인플루언서 협업 |
+**예상 시간**: 30시간
 
 ---
 
-## 팀 구성 및 역할
+### Phase 3: 블로그 및 포스트 시스템
+**목표**: 3개 블로그 홈, 포스트 CRUD, On Air 피드
 
-### 현재 팀 (Solo Development)
-- **개발자 1명**: Full-stack 개발, 디자인, 기획 모두 담당
+#### 3.1 블로그 인덱스
+- [x] 블로그 목록 API (`GET /api/blogs`)
+  - slug/name/description/visibility/포스트 수 반환
+  - 캐싱 전략(e.g. revalidate) 정의
+- [x] 홈 페이지 (`/page.tsx`) 실데이터 연결
+  - 블로그 카드에 최신 포스트 수/컬러 반영
+  - 숏컷 링크 → 각 블로그 페이지
 
-### 협업 필요 시 (선택사항)
-- **디자이너**: UI/UX 디자인 개선
-- **마케터**: 초기 사용자 확보
-- **테스터**: QA 및 베타 테스트
+#### 3.2 블로그 홈 (피드)
+- [x] 포스트 목록 API (`GET /api/posts`)
+  - 필수 쿼리: blogSlug
+  - 선택: categorySlug, tag, page, pageSize(<=20), status(admin only)
+  - 응답: id, title, slug, excerpt, publishedAt, author, tag 목록
+- [x] 블로그 홈 페이지 (`/blogs/[slug]/page.tsx`)
+  - Server Component로 목록 Paginate
+  - 카테고리 탭/태그 필터 UI
+  - Empty state / 로딩 상태
+- [x] 블로그 정보 API (`GET /api/blogs/[slug]`) → 설명, 배너, 카테고리 목록 제공
 
----
+#### 3.3 포스트 작성
+- [x] Markdown 에디터 라이브러리 선택 및 통합 (예: @uiw/react-md-editor)
+- [x] 포스트 작성 페이지 (`/blogs/[slug]/write`)
+  - 제목/슬러그 미리보기, 카테고리 선택, 태그 입력, 본문 작성
+  - draft 저장 버튼, 발행 버튼
+- [x] 포스트 작성 API (`POST /api/posts`)
+  - slug unique(블로그별) 생성, excerpt/truncated body 저장
+  - 권한 검증: WRITER 이상, canWriteToBlog
+  - 태그 upsert 후 연결
 
-## 일일 개발 계획 (Daily Schedule)
+#### 3.4 포스트 상세
+- [x] 포스트 상세 API (`GET /api/posts/[slug]`)
+  - blogSlug + postSlug 매핑, author, category, tags, 관련글 3개 포함
+- [x] 포스트 상세 페이지 (`/blogs/[slug]/post/[postSlug]`)
+  - Markdown 렌더링, 메타태그 설정
+  - 권한자에게만 수정/삭제 드롭다운 노출
+- [ ] 조회수 증가 전략 (향후 Phase 4 확장 예정, 일단 DB counter 필드 준비)
 
-### 평일 (월-금)
-- **09:00 - 10:00**: 문서 검토, 오늘 할 일 확인
-- **10:00 - 13:00**: 개발 (핵심 기능)
-- **13:00 - 14:00**: 점심 휴식
-- **14:00 - 18:00**: 개발 (보조 기능, UI)
-- **18:00 - 19:00**: 테스트, 코드 리뷰
-- **19:00 - 20:00**: 문서 업데이트, 진행 상황 정리
+#### 3.5 포스트 수정/삭제
+- [x] 포스트 수정 페이지 (`/blogs/[slug]/edit/[id]`)
+  - 기존 데이터 로드
+  - 수정 권한 검증 (작성자 or ADMIN)
+- [x] 포스트 수정 API (`PATCH /api/posts/[id]`)
+- [x] 포스트 삭제 API (`DELETE /api/posts/[id]`)
 
-### 주말 (토-일)
-- **선택적 개발**: 밀린 작업이나 학습에 활용
-- **주간 회고**: 일요일 저녁 이번 주 성과 정리
+#### 3.6 On Air 피드
+- [x] 통합 피드 API (`GET /api/on-air`)
+  - 최신 N개 포스트(블로그 합산) 반환, 캐싱 60초
+- [x] On Air 페이지 (`/on-air/page.tsx`)
+  - 전체/블로그별 필터
+  - 실시간 느낌의 UI + Empty state
 
----
+#### 3.7 블로그 이미지 및 디자인 관리
+- [x] 블로그 설정 업데이트 API (`PATCH /api/blogs/[id]`)
+  - 이미지 URL 업데이트 (coverImageUrl, logoImageUrl, thumbnailUrl)
+  - 디자인 설정 (primaryColor, headingFont, bodyFont, layoutStyle, sidebarPosition)
+- [x] 블로그 관리 UI (`/admin/blogs`)
+  - 3개 블로그 탭 (Serein Cafe, Studio CPA, Swing Company)
+  - 이미지 URL 입력 필드 + 미리보기
+  - 색상 피커 (primaryColor)
+  - 폰트 선택 드롭다운
+  - 레이아웃 옵션 선택
+  - 실시간 저장
 
-## 품질 관리 (Quality Assurance)
+#### 3.8 카테고리 관리
+- [x] 카테고리 CRUD API (`/api/admin/categories`)
+  - 블로그별 카테고리 목록
+  - 추가/수정/삭제 (ADMIN만)
+- [x] 카테고리 관리 섹션 (블로그 관리 UI 내)
 
-### 코드 품질
-- [ ] ESLint + Prettier 규칙 준수
-- [ ] TypeScript strict 모드 사용
-- [ ] 코드 리뷰 체크리스트 작성
-- [ ] 최소 70% 테스트 커버리지
+**완료 기준**:
+- 블로그 홈에서 포스트 목록 조회
+- WRITER가 모든 블로그에 글 작성 가능
+- 작성한 포스트가 상세 페이지에서 Markdown 렌더링
+- On Air에서 전체 최신글 확인
 
-### 성능 기준
-- [ ] Lighthouse 점수: 90점 이상
-- [ ] First Contentful Paint: 1.8초 이하
-- [ ] Time to Interactive: 3.8초 이하
-- [ ] API 응답 시간: 500ms 이하
-
-### 보안 체크리스트
-- [ ] HTTPS 적용
-- [ ] SQL Injection 방어
-- [ ] XSS 방어
-- [ ] CSRF 토큰 적용
-- [ ] Rate Limiting 설정
-- [ ] 민감 정보 환경 변수화
-
----
-
-## 문서 업데이트 규칙
-
-### 작업 시작 전
-1. PRD에서 해당 기능 명세 확인
-2. DEVELOPMENT_PLAN에서 Task 상태를 "in_progress"로 변경
-3. 필요시 세부 계획 추가 작성
-
-### 작업 중
-1. 중요한 기술적 결정 사항은 Task 비고란에 기록
-2. API 변경 시 PRD 업데이트
-3. DB 스키마 변경 시 PRD 업데이트
-
-### 작업 완료 후
-1. Task 상태를 "completed"로 변경
-2. 완료 날짜 기록
-3. TEST_REPORT에 테스트 항목 추가
-4. README 업데이트 (필요시)
-
----
-
-## 진행 상황 추적
-
-### 전체 진행률
-- **전체 Task 수**: 79개
-- **완료**: 0개 (0%)
-- **진행 중**: 0개 (0%)
-- **대기 중**: 79개 (100%)
-
-### Phase별 진행률
-| Phase | Task 수 | 완료 | 진행 중 | 완료율 |
-|-------|---------|------|---------|--------|
-| Phase 1: 초기 설정 | 6 | 0 | 0 | 0% |
-| Phase 2: 인증 | 10 | 0 | 0 | 0% |
-| Phase 3: 프로필 | 10 | 0 | 0 | 0% |
-| Phase 4: 커뮤니티 | 11 | 0 | 0 | 0% |
-| Phase 5: 게시글 | 12 | 0 | 0 | 0% |
-| Phase 6: 이벤트 | 8 | 0 | 0 | 0% |
-| Phase 7: 홈/탐색 | 6 | 0 | 0 | 0% |
-| Phase 8: 테스트 | 9 | 0 | 0 | 0% |
-| Phase 9: 배포 | 8 | 0 | 0 | 0% |
+**예상 시간**: 60시간
 
 ---
 
-## 주간 리뷰 (Weekly Review)
+### Phase 4: 댓글 시스템
+**목표**: 포스트 댓글 작성/수정/삭제
 
-### Week 1 (2025-01-19 ~ 2025-01-26)
-- **계획**: Phase 1 완료
-- **실제**: 
-- **이슈**: 
-- **다음 주**: 
+#### 4.1 댓글 작성
+- [x] 댓글 입력 폼 (포스트 상세 하단)
+  - 텍스트 영역 (최대 500자)
+  - 로그인 필요 안내
+- [x] 댓글 작성 API (`POST /api/comments`)
+  - postId, content, authorId
+- [x] Optimistic UI / 캐시 갱신
 
-### Week 2 (2025-01-27 ~ 2025-02-02)
-- **계획**: Phase 2 진행
-- **실제**: 
-- **이슈**: 
-- **다음 주**: 
+#### 4.2 댓글 목록
+- [x] 댓글 목록 API (`GET /api/comments?postId=xxx`)
+- [x] 댓글 리스트 컴포넌트
+  - 작성자, 내용, 시간 (상대 시간)
+  - 수정/삭제 버튼 (권한자에게만)
+- [x] 최신순 정렬 (대댓글 구조는 추후 확장)
 
-*(매주 업데이트)*
+#### 4.3 댓글 수정/삭제
+- [x] 댓글 수정 API (`PATCH /api/comments/[id]`)
+- [x] 댓글 삭제 API (`DELETE /api/comments/[id]`)
+  - 권한: 작성자 or ADMIN
+- [x] 댓글 수정 UI (인라인 편집)
 
----
+**완료 기준**:
+- 로그인 사용자가 댓글 작성 가능 ✔️
+- 작성 즉시 화면에 반영 (Optimistic UI) ✔️
+- 본인 댓글 수정/삭제 가능 ✔️
+- ADMIN이 모든 댓글 삭제 가능 ✔️
 
-## 참고 자료
-
-### 관련 문서
-- [PRD.md](./PRD.md) - 상세 기능 명세
-- [README.md](../README.md) - 프로젝트 개요
-- [FUTURE_DEVELOPMENT_ROADMAP.md](./FUTURE_DEVELOPMENT_ROADMAP.md) - 향후 계획
-
-### 기술 문서
-- [Next.js Documentation](https://nextjs.org/docs)
-- [NestJS Documentation](https://docs.nestjs.com)
-- [Prisma Documentation](https://www.prisma.io/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-
-### 참고 서비스
-- Meetup
-- Facebook Groups
-- Reddit Communities
-- Discord Servers
+**예상 시간**: 25시간 → 실제 진행 완료
 
 ---
 
-## 변경 이력
+### Phase 5: 검색 기능
+**목표**: 포스트 검색
 
-| 날짜 | 변경 내용 | 작성자 |
-|------|----------|--------|
-| 2025-01-19 | 초안 작성 | Dev Team |
+#### 5.1 검색 기능
+- [x] 검색 페이지 (`/search`)
+  - 검색어 입력
+  - 검색 결과 카드 리스트
+  - 블로그별 필터
+- [x] 검색 API (`GET /api/search?q=keyword`)
+  - 제목, 본문 LIKE 검색 (Case-insensitive)
+  - PUBLISHED만 검색
+- [x] Header 검색 바 추가
+
+**완료 기준**:
+- 검색어 입력 시 관련 포스트 조회 ✔️
+- 검색 결과가 없을 경우 안내 메시지 제공 ✔️
+- 검색 결과 클릭 시 해당 포스트 상세로 이동 ✔️
+
+**예상 시간**: 15시간 → 완료
 
 ---
 
-**문서 상태**: Active  
-**다음 업데이트**: 매주 일요일  
-**담당자**: Development Team
+### Phase 6: 관리자 대시보드
+**목표**: 관리자 대시보드 및 모더레이션
 
+#### 6.1 대시보드
+- [x] 대시보드 페이지 (`/admin/page.tsx`)
+  - KPI 카드 (사용자 수, 포스트 수, 댓글 수, 숨김 항목)
+  - 최근 포스트 테이블 (10개)
+  - 최근 댓글 테이블 (10개)
+- [x] 통계 API (`GET /api/admin/stats`)
+
+#### 6.2 포스트 관리
+- [x] 포스트 관리 페이지 (`/admin/posts`)
+  - 전체 포스트 목록
+  - 상태별 필터 (PUBLISHED/DRAFT/ARCHIVED)
+  - 블로그별 필터
+  - 제목/내용 검색
+- [x] 포스트 숨김/복구 액션
+  - 상태 변경 API (`PATCH /api/admin/posts/[id]/status`)
+  - 모더레이션 로그 기록 *(추후 확장 예정)*
+
+#### 6.3 댓글 관리
+- [x] 댓글 관리 페이지 (`/admin/comments`)
+  - 전체 댓글 목록
+  - 포스트 제목 표시
+  - 댓글 숨김/삭제 액션
+- [x] 댓글 모더레이션 API (`PATCH /api/admin/comments/[id]/status`)
+
+#### 6.4 블로그/카테고리 관리
+- [x] 블로그 관리 페이지 (`/admin/blogs`)
+  - 블로그 이름, 설명, 디자인 속성 수정
+  - 카테고리 CRUD
+
+**완료 기준**:
+- ADMIN이 대시보드에서 전체 통계 확인
+- 부적절한 포스트를 HIDDEN 상태로 변경 가능
+- 모더레이션 로그 기록 확인 (누가, 언제, 무엇을, 왜) *(선택/추후)*
+
+**예상 시간**: 35시간 → 완료
+
+---
+
+### Phase 7: UI/UX 개선 및 반응형
+**목표**: 전체 UI 정제 및 모바일 대응
+
+#### 7.1 디자인 일관성
+- [x] 컬러 팔레트 확정 (Tailwind config)
+- [x] 타이포그래피 통일
+- [x] 버튼, 카드, 폼 스타일 일관성
+
+#### 7.2 반응형 디자인
+- [ ] 모바일 (< 768px) 레이아웃
+- [ ] 태블릿 (768px - 1024px) 레이아웃
+- [ ] Header 모바일 메뉴 (햄버거)
+
+#### 7.3 UX 개선
+- [ ] 로딩 스피너 (전역, 컴포넌트별)
+- [ ] Toast 알림 (성공/에러)
+- [ ] 404/500 에러 페이지
+- [x] 빈 상태 UI (Empty State)
+  - 포스트 없음 ✔️
+  - 댓글 없음 *(추가 예정)*
+  - 검색 결과 없음 ✔️
+
+#### 7.4 접근성
+- [ ] 키보드 포커스 관리
+- [ ] ARIA 속성 추가
+- [ ] 색상 대비 체크 (WCAG AA)
+
+**완료 기준**:
+- 모바일에서 모든 페이지 정상 동작
+- 키보드만으로 주요 기능 사용 가능
+- 로딩/에러 상태가 사용자에게 명확히 전달
+
+**예상 시간**: 30시간
+
+---
+
+### Phase 8: 테스트 및 버그 수정
+**목표**: 전체 기능 테스트 및 배포 준비
+
+#### 8.1 기능 테스트
+- [ ] 회원가입/로그인 플로우
+- [ ] 역할별 권한 테스트
+  - USER: 댓글만 가능
+  - WRITER: 모든 블로그에 작성 가능
+  - ADMIN: 모든 기능 가능
+- [ ] 포스트 작성/수정/삭제
+- [ ] 댓글 작성/삭제
+- [ ] 검색 기능
+- [ ] 관리자 기능 (숨김, 역할 변경)
+
+#### 8.2 성능 테스트
+- [ ] 페이지 로드 시간 체크
+- [ ] 이미지 최적화 (next/image)
+- [ ] Bundle 사이즈 분석
+
+#### 8.3 SEO 기본
+- [ ] 메타 태그 (title, description)
+- [ ] OpenGraph 이미지
+- [ ] robots.txt
+- [ ] sitemap.xml (정적 페이지)
+
+#### 8.4 배포 준비
+- [ ] 환경 변수 Vercel 설정
+- [ ] 데이터베이스 마이그레이션 (프로덕션)
+- [ ] 배포 스크립트 테스트
+- [ ] GitHub Actions CI/CD 확인
+
+**완료 기준**:
+- 모든 핵심 기능 동작
+- 알려진 버그 없음
+- Vercel 배포 성공
+- 프로덕션 URL 접속 가능
+
+**예상 시간**: 30시간
+
+---
+
+## 진행 관리 제안
+
+- **주간 점검**: 각 마일스톤 진행 상황을 주간 회의에서 확인하고 장애 요소를 공유합니다.
+- **이슈 트래킹**: GitHub Projects 또는 Linear로 기능/버그를 티켓 단위로 관리합니다.
+- **브랜치 전략**: `main`(배포), `develop`(통합), `feature/*`(단위 작업) 구조를 유지하고, 마일스톤 완료 시 태그를 남깁니다.
+- **리스크 모니터링**: Markdown 에디터, 권한 복잡도, 배포 이슈 등 주요 리스크를 회고 때마다 재평가합니다.
+
+---
+
+## 리스크 관리
+
+### 리스크 1: 기술 스택 변경 (NestJS → Next.js API Routes)
+**확률**: 낮음
+**영향도**: 중간
+**대응**:
+- Next.js API Routes 공식 문서 숙지
+- Prisma 연결 예제 확인
+- 초기 Phase에서 API 구조 확정
+
+### 리스크 2: Markdown 에디터 라이브러리 선택
+**확률**: 중간
+**영향도**: 중간
+**대응**:
+- Phase 3 초기에 여러 라이브러리 프로토타입 테스트
+- 후보: react-md-editor, @uiw/react-markdown-editor, react-simplemde-editor
+- 필수 기능: 이미지 삽입 (URL), 코드 블록, 미리보기
+
+### 리스크 3: 권한 로직 복잡도
+**확률**: 중간
+**영향도**: 높음
+**대응**:
+- Phase 2에서 권한 로직 단일 함수로 추상화
+- 단위 테스트 작성
+- 블로그별 권한 매핑 테이블을 코드로 명시
+
+### 리스크 4: 일정 지연
+**확률**: 중간
+**영향도**: 중간
+**대응**:
+- 주 단위 진행 체크
+- 지연 시 Phase 7 (UI/UX 개선) 축소
+- Phase 5 (검색) 또는 Phase 6 일부 (카테고리 관리) v1.0으로 연기 고려
+
+### 리스크 5: 배포 이슈
+**확률**: 낮음
+**영향도**: 높음
+**대응**:
+- Phase 3 완료 시점에 Vercel 테스트 배포
+- 환경 변수 미리 설정
+- 데이터베이스 마이그레이션 스크립트 검증
+
+---
+
+## 다음 단계 (v1.0 이후)
+
+MVP 완료 후 다음 기능 개발 예정:
+
+### Q2 2025 (v1.0)
+1. **소셜 로그인** (Google, Kakao OAuth)
+2. **이미지 직접 업로드** (S3/Cloudinary)
+3. **포스트 북마크** 기능
+4. **알림 이메일** (신규 댓글 알림)
+5. **고급 검색** (PostgreSQL Full-Text Search)
+6. **SEO 최적화** (동적 sitemap, structured data)
+
+### Q3 2025 (v2.0)
+1. **실시간 알림** (WebSocket)
+2. **포스트 공유** (소셜 미디어)
+3. **통계 대시보드** (차트, 그래프)
+4. **RSS 피드**
+5. **다크 모드**
+
+---
+
+## 참고 문서
+- [PRD (Product Requirements Document)](./PRD.md)
+- [README](../README.md)
+- [API 명세](./API_SPEC.md) *(작성 예정)*
+
+---
+
+**문서 버전**: 1.0
+**마지막 업데이트**: 2025-01-20
+**작성자**: Development Team

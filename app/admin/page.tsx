@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 import { auth } from '@/auth'
 import { canManageUsers } from '@/lib/auth/permissions'
@@ -12,7 +13,7 @@ export default async function AdminDashboardPage() {
   const session = await auth()
 
   if (!canManageUsers(session?.user ?? null)) {
-    return null
+    redirect('/forbidden?from=/admin')
   }
 
   const [stats, recentPosts, recentComments] = await Promise.all([

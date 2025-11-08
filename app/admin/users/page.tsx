@@ -16,7 +16,7 @@ type SearchParams = {
   q?: string
 }
 
-function buildQuery(params: SearchParams & { page?: number | string }) {
+function buildQuery(params: { q?: string; role?: string; page?: number | string }) {
   const urlSearch = new URLSearchParams()
   if (params.q) urlSearch.set('q', params.q)
   if (params.role) urlSearch.set('role', params.role)

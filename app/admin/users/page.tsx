@@ -46,8 +46,8 @@ export default async function AdminUsersPage({
     ...(query
       ? {
           OR: [
-            { email: { contains: query, mode: 'insensitive' } },
-            { nickname: { contains: query, mode: 'insensitive' } },
+            { email: { contains: query, mode: 'insensitive' as const } },
+            { nickname: { contains: query, mode: 'insensitive' as const } },
           ],
         }
       : {}),

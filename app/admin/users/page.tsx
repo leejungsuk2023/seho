@@ -173,7 +173,7 @@ export default async function AdminUsersPage({
         </span>
         <div className="flex gap-2">
           <Link
-            href={`/admin/users?${buildQuery({ ...searchParams, page: page - 1 })}`}
+            href={`/admin/users?${buildQuery({ q: searchParams.q, role: searchParams.role, page: page - 1 })}`}
             className={`rounded-md border px-3 py-1 ${
               page <= 1
                 ? 'pointer-events-none border-border text-muted-foreground'
@@ -183,7 +183,7 @@ export default async function AdminUsersPage({
             이전
           </Link>
           <Link
-            href={`/admin/users?${buildQuery({ ...searchParams, page: page + 1 })}`}
+            href={`/admin/users?${buildQuery({ q: searchParams.q, role: searchParams.role, page: page + 1 })}`}
             className={`rounded-md border px-3 py-1 ${
               page >= totalPages
                 ? 'pointer-events-none border-border text-muted-foreground'

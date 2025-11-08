@@ -16,11 +16,14 @@ type SearchParams = {
   q?: string
 }
 
-function buildQuery(params: SearchParams & { page?: number }) {
+function buildQuery(params: SearchParams & { page?: number | string }) {
   const urlSearch = new URLSearchParams()
   if (params.q) urlSearch.set('q', params.q)
   if (params.role) urlSearch.set('role', params.role)
-  if (params.page && params.page > 0) urlSearch.set('page', String(params.page))
+  if (params.page) {
+    const pageNum = typeof params.page === 'number' ? params.page : Number(params.page)
+    if (pageNum > 0) urlSearch.set('page', String(pageNum))
+  }
   return urlSearch.toString()
 }
 

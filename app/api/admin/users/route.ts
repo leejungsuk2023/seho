@@ -43,8 +43,8 @@ export async function GET(request: Request) {
     ...(q
       ? {
           OR: [
-            { email: { contains: q, mode: "insensitive" } },
-            { nickname: { contains: q, mode: "insensitive" } },
+            { email: { contains: q, mode: "insensitive" as const } },
+            { nickname: { contains: q, mode: "insensitive" as const } },
           ],
         }
       : {}),

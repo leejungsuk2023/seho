@@ -21,10 +21,15 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth()
-  const actingUser = session?.user ?? null
+  const actingUser = session?.user
 
   if (!canManageUsers(actingUser)) {
     return new NextResponse("접근 권한이 없습니다.", { status: 403 })
+  }
+
+  // canManageUsers passed, so actingUser is not null
+  if (!actingUser) {
+    return new NextResponse("인증이 필요합니다.", { status: 401 })
   }
 
   const body = await request.json().catch(() => null)

@@ -286,9 +286,9 @@ export const searchPublishedPosts = cache(async (options: SearchOptions) => {
       ...(options.blogSlug ? { slug: options.blogSlug } : {}),
     },
     OR: [
-      { title: { contains: searchTerm, mode: "insensitive" } },
-      { excerpt: { contains: searchTerm, mode: "insensitive" } },
-      { content: { contains: searchTerm, mode: "insensitive" } },
+      { title: { contains: searchTerm, mode: "insensitive" as const } },
+      { excerpt: { contains: searchTerm, mode: "insensitive" as const } },
+      { content: { contains: searchTerm, mode: "insensitive" as const } },
     ],
   }
 

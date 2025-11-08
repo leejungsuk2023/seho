@@ -1,16 +1,22 @@
-import { auth } from "@/auth"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export default auth((request) => {
-  const { nextUrl, auth: session } = request
-  const pathname = nextUrl.pathname
+export function middleware(request: NextRequest) {
+  const { pathname, search } = request.nextUrl
 
-  if (!session?.user) {
-    const callback = encodeURIComponent(pathname + nextUrl.search)
-    return Response.redirect(
-      new URL(`/auth/sign-in?callbackUrl=${callback}`, nextUrl),
+  // Check for next-auth session token
+  const token = request.cookies.get("next-auth.session-token") ||
+                request.cookies.get("__Secure-next-auth.session-token")
+
+  if (!token) {
+    const callback = encodeURIComponent(pathname + search)
+    return NextResponse.redirect(
+      new URL(`/auth/sign-in?callbackUrl=${callback}`, request.url)
     )
   }
-})
+
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: [

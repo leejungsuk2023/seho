@@ -100,22 +100,22 @@ export default async function BlogPage({ params, searchParams }: BlogPageProps) 
               {canWrite && (
                 <Link
                   href={`/blogs/${blog.slug}/write`}
-                  className="group inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 font-semibold text-gray-900 shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                  className="group inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 font-bold text-gray-900 shadow-lg ring-2 ring-white/20 transition-all hover:scale-105 hover:shadow-2xl hover:ring-white/40"
                 >
                   <svg
                     className="h-5 w-5 transition-transform group-hover:rotate-90"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
+                    strokeWidth={2.5}
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
                       d="M12 4v16m8-8H4"
                     />
                   </svg>
-                  글쓰기
+                  <span className="text-gray-900">글쓰기</span>
                 </Link>
               )}
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 font-medium">

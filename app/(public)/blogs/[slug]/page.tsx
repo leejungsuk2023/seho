@@ -8,7 +8,8 @@ import { getPostListForBlog } from '@/lib/posts'
 import { PostCard } from '@/components/post/PostCard'
 import { cn } from '@/lib/utils/cn'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 type BlogPageProps = {
   params: { slug: string }
@@ -17,20 +18,6 @@ type BlogPageProps = {
     category?: string
     tag?: string
   }
-}
-
-export async function generateStaticParams() {
-  const blogs = await getBlogSlugs()
-  return blogs.map((slug) => ({ slug }))
-}
-
-async function getBlogSlugs() {
-  const { prisma } = await import('@/lib/prisma')
-  const blogs = await prisma.blog.findMany({
-    where: { visibility: true },
-    select: { slug: true },
-  })
-  return blogs.map((blog) => blog.slug)
 }
 
 export default async function BlogPage({ params, searchParams }: BlogPageProps) {

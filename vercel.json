@@ -1,7 +1,7 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "pnpm install && pnpm prisma migrate deploy && pnpm prisma generate && pnpm build",
+  "buildCommand": "pnpm install && pnpm prisma migrate deploy && pnpm prisma generate && pnpm exec tsx prisma/seed.ts && pnpm build",
   "installCommand": "pnpm install",
   "outputDirectory": ".next",
   "github": {

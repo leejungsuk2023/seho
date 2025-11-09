@@ -5,7 +5,10 @@ export function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl
 
   // Check for next-auth session token
-  const token = request.cookies.get("next-auth.session-token") ||
+  // NextAuth v5 uses authjs.session-token in production (HTTPS)
+  const token = request.cookies.get("authjs.session-token") ||
+                request.cookies.get("__Secure-authjs.session-token") ||
+                request.cookies.get("next-auth.session-token") ||
                 request.cookies.get("__Secure-next-auth.session-token")
 
   if (!token) {

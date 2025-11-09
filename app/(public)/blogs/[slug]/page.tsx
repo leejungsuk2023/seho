@@ -2,11 +2,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { auth } from '@/auth'
 import { getBlogBySlug } from '@/lib/blogs'
 import { getBlogTheme } from '@/lib/constants/blogThemes'
 import { getPostListForBlog } from '@/lib/posts'
 import { PostCard } from '@/components/post/PostCard'
 import { cn } from '@/lib/utils/cn'
+import { canWriteToBlog } from '@/lib/auth/permissions'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -29,6 +31,8 @@ export default async function BlogPage({ params, searchParams }: BlogPageProps) 
   }
 
   const theme = getBlogTheme(blog.slug)
+  const session = await auth()
+  const canWrite = canWriteToBlog(session?.user ?? null, blog.slug)
 
   const resolvedSearchParams = await searchParams
   const page = Number(resolvedSearchParams.page ?? '1')
@@ -93,6 +97,27 @@ export default async function BlogPage({ params, searchParams }: BlogPageProps) 
               </div>
             </div>
             <div className="flex flex-col items-start gap-3 text-sm text-white/70 md:items-end">
+              {canWrite && (
+                <Link
+                  href={`/blogs/${blog.slug}/write`}
+                  className="group inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 font-semibold text-gray-900 shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                >
+                  <svg
+                    className="h-5 w-5 transition-transform group-hover:rotate-90"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  글쓰기
+                </Link>
+              )}
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 font-medium">
                 총 포스트 {pagination.total.toLocaleString()}개
               </div>

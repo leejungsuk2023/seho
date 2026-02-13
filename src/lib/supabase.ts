@@ -18,7 +18,9 @@ function getClient(): SupabaseClient<Database> {
       autoRefreshToken: true,
     },
     global: {
-      fetch: (...args) => fetch(...args),
+      fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+        return fetch(input, { ...init, signal: undefined });
+      },
     },
   });
   return cachedClient;

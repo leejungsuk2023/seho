@@ -54,31 +54,15 @@ export const authApi = {
         return { user: null, error: new Error('사용자 생성에 실패했습니다.') };
       }
 
-      // signUp 후 세션이 완전히 설정되도록 명시적으로 signIn
-      // (RLS 정책이 auth.uid()를 확인하므로 세션이 반드시 필요)
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        return { user: null, error: new Error('계정은 생성되었으나 자동 로그인에 실패했습니다. 로그인 페이지에서 로그인해주세요.') };
-      }
-
-      // 세션이 확실히 활성화된 상태에서 users 테이블에 사용자 정보 생성
-      const user = await usersApi.create({
-        id: authData.user.id,
-        username: userData.username,
-        nickname: userData.nickname,
-        email,
-        role: 'VIEWER',
-      });
+      // DB 트리거(on_auth_user_created)가 auth.users INSERT 시 자동으로 users 테이블에 생성
+      // 트리거가 처리하므로 여기서 usersApi.create() 호출하지 않음 (중복 시 23505 에러 발생)
+      const user = await usersApi.getById(authData.user.id);
 
       if (!user) {
-        return { user: null, error: new Error('회원 정보 저장에 실패했습니다. 로그인을 시도하면 자동으로 복구됩니다.') };
+        return { user: null, error: new Error('회원 정보 저장에 실패했습니다. 잠시 후 로그인을 시도해주세요.') };
       }
 
-      // 가입 완료 후 세션 정리 (로그인 페이지로 보내므로)
+      // 가입 완료 후 세션 정리 (로그인 페이지로 안내하므로)
       try {
         await supabase.auth.signOut();
       } catch {

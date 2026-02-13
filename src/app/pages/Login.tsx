@@ -33,7 +33,6 @@ export default function Login() {
     if (user) {
       toast.success(`${user.nickname}님, 환영합니다!`);
       navigate('/');
-      window.location.reload();
     } else {
       toast.error('사용자 정보를 불러올 수 없습니다. 다시 시도해주세요.');
     }

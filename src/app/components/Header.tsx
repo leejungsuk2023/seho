@@ -37,7 +37,6 @@ export default function Header() {
     await authApi.signOut();
     setUser(null);
     navigate('/');
-    window.location.reload();
   };
 
   return (

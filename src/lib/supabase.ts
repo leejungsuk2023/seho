@@ -17,6 +17,9 @@ function getClient(): SupabaseClient<Database> {
       persistSession: true,
       autoRefreshToken: true,
     },
+    global: {
+      fetch: (...args) => fetch(...args),
+    },
   });
   return cachedClient;
 }

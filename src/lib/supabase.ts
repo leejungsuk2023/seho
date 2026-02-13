@@ -14,7 +14,12 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(url, ke
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: false,
-  },
+    flowType: 'implicit',
+    // Supabase v2의 내부 lock 메커니즘이 AbortError를 유발하므로 no-op lock 사용
+    lock: async (_name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => {
+      return await fn();
+    },
+  } as Record<string, unknown>,
   global: {
     fetch: (input: RequestInfo | URL, init?: RequestInit) => {
       const { signal: _signal, ...rest } = init ?? {};

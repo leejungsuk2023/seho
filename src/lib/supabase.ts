@@ -25,6 +25,24 @@ const customFetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Resp
   });
 };
 
+// Supabase 세션을 localStorage에서 강제 제거하는 헬퍼
+// signOut()이 403/401 등으로 실패할 때 사용
+export function forceCleanSession() {
+  try {
+    // Supabase는 `sb-{ref}-auth-token` 형태로 localStorage에 세션을 저장함
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
+        keysToRemove.push(k);
+      }
+    }
+    keysToRemove.forEach((k) => localStorage.removeItem(k));
+  } catch {
+    // localStorage 접근 불가 시 무시
+  }
+}
+
 export const supabase: SupabaseClient<Database> = createClient<Database>(url, key, {
   auth: {
     persistSession: true,

@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, forceCleanSession } from './supabase';
 import type { User, Blog, Category, Post, Comment, PostStatus, UserRole } from '../app/data/mockData';
 import { retryOnAbortError } from './supabase-retry';
 
@@ -35,13 +35,15 @@ export const usersApi = {
   // 사용자 ID로 조회
   async getById(id: string): Promise<User | null> {
     // 재시도 로직 제거 - 일반적인 조회는 빠르게 처리
+    // maybeSingle()을 사용하여 결과가 없어도 에러가 발생하지 않도록 함
     const { data, error } = await supabase
       .from('users')
       .select('*')
       .eq('id', id)
-      .single();
+      .maybeSingle();
 
-    if (error) {
+    // PGRST116은 "not found" 에러로 정상적인 경우임
+    if (error && error.code !== 'PGRST116') {
       console.error('Error fetching user:', error);
       return null;
     }
@@ -55,9 +57,10 @@ export const usersApi = {
       .from('users')
       .select('*')
       .eq('username', username)
-      .single();
+      .maybeSingle();
 
-    if (error) {
+    // PGRST116은 "not found" 에러로 정상적인 경우임
+    if (error && error.code !== 'PGRST116') {
       console.error('Error fetching user by username:', error);
       return null;
     }
@@ -75,17 +78,25 @@ export const usersApi = {
         return null;
       }
 
+      // 배포 환경에서도 안전하게 처리하기 위해 에러 처리 강화
       const result = await this.getById(session.user.id);
       
       // 세션은 있지만 users 테이블에 사용자가 없으면 세션 무효화하고 null 반환
       if (!result) {
-        // 잘못된 세션 정리
-        await supabase.auth.signOut();
+        // 잘못된 세션 정리 (배포 환경에서도 작동하도록)
+        try {
+          await supabase.auth.signOut();
+        } catch (signOutError) {
+          // signOut 실패 시 (403/401) localStorage에서 세션 강제 제거
+          console.warn('Failed to sign out, force cleaning session:', signOutError);
+          forceCleanSession();
+        }
         return null;
       }
       
       return result;
     } catch (error) {
+      // 배포 환경에서 발생할 수 있는 예상치 못한 에러 처리
       console.error('Error getting current user:', error);
       return null;
     }

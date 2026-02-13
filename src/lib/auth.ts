@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase, forceCleanSession } from './supabase';
 import type { User } from '../app/data/mockData';
 import { usersApi } from './supabase-api';
 import { retryOnAbortError } from './supabase-retry';
@@ -14,6 +14,20 @@ export const authApi = {
     nickname: string;
   }): Promise<{ user: User | null; error: Error | null }> {
     try {
+      // 회원가입 전 stale 세션 정리 (이전에 삭제된 사용자의 세션이 남아있을 수 있음)
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          try {
+            await supabase.auth.signOut();
+          } catch {
+            forceCleanSession();
+          }
+        }
+      } catch {
+        forceCleanSession();
+      }
+
       // Supabase Auth에 사용자 생성 (재시도 적용)
       const { data: authData, error: authError } = await retryOnAbortError(() =>
         supabase.auth.signUp({
@@ -95,8 +109,14 @@ export const authApi = {
   async signOut(): Promise<{ error: Error | null }> {
     try {
       const { error } = await supabase.auth.signOut();
+      if (error) {
+        // signOut API가 에러를 반환해도 로컬 세션은 정리
+        forceCleanSession();
+      }
       return { error };
     } catch (error) {
+      // 네트워크 오류 등으로 완전히 실패해도 로컬 세션 정리
+      forceCleanSession();
       return { error: error as Error };
     }
   },
@@ -127,8 +147,14 @@ export const authApi = {
       
       // 세션은 있지만 users 테이블에 사용자가 없으면 세션 무효화하고 null 반환
       if (!user) {
-        // 잘못된 세션 정리
-        await supabase.auth.signOut();
+        // 잘못된 세션 정리 (배포 환경에서도 작동하도록)
+        try {
+          await supabase.auth.signOut();
+        } catch (signOutError) {
+          // signOut 실패 시 (403/401 등) localStorage에서 세션 강제 제거
+          console.warn('Failed to sign out, force cleaning session:', signOutError);
+          forceCleanSession();
+        }
         callback(null);
         return;
       }

@@ -116,24 +116,23 @@ export const authApi = {
   // 세션 변경 감지
   onAuthStateChange(callback: (user: User | null) => void) {
     return supabase.auth.onAuthStateChange(async (event, session) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/1b0a61d3-a8a5-4c1e-b6a4-a1942dbb7e28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.ts:118',message:'onAuthStateChange event',data:{event,hasSession:!!session,hasUser:!!session?.user,userId:session?.user?.id},timestamp:Date.now(),runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
-      
       // 세션이 없거나 사용자가 없으면 null 반환
       if (!session?.user) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/1b0a61d3-a8a5-4c1e-b6a4-a1942dbb7e28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.ts:122',message:'onAuthStateChange no session/user',data:{event},timestamp:Date.now(),runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
         callback(null);
         return;
       }
       
       // 사용자 정보 조회
       const user = await usersApi.getById(session.user.id);
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/1b0a61d3-a8a5-4c1e-b6a4-a1942dbb7e28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth.ts:128',message:'onAuthStateChange user fetched',data:{hasUser:!!user,userId:user?.id,username:user?.username,event},timestamp:Date.now(),runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
+      
+      // 세션은 있지만 users 테이블에 사용자가 없으면 세션 무효화하고 null 반환
+      if (!user) {
+        // 잘못된 세션 정리
+        await supabase.auth.signOut();
+        callback(null);
+        return;
+      }
+      
       callback(user);
     });
   },

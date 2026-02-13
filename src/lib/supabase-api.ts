@@ -68,35 +68,24 @@ export const usersApi = {
   // 현재 로그인한 사용자 조회 (빠른 버전 - getSession 사용)
   async getCurrentUser(): Promise<User | null> {
     try {
-      // #region agent log
-      const startTime = Date.now();
-      fetch('http://127.0.0.1:7242/ingest/1b0a61d3-a8a5-4c1e-b6a4-a1942dbb7e28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'supabase-api.ts:70',message:'getCurrentUser started',data:{timestamp:startTime},timestamp:startTime,runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
-      
       // 빠른 로컬 세션 확인 (서버 요청 없음)
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
-      // #region agent log
-      const afterGetSession = Date.now();
-      fetch('http://127.0.0.1:7242/ingest/1b0a61d3-a8a5-4c1e-b6a4-a1942dbb7e28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'supabase-api.ts:76',message:'getSession result',data:{hasSession:!!session,hasUser:!!session?.user,userId:session?.user?.id,elapsed:afterGetSession-startTime},timestamp:afterGetSession,runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
-      
       if (sessionError || !session?.user) {
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/1b0a61d3-a8a5-4c1e-b6a4-a1942dbb7e28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'supabase-api.ts:80',message:'getCurrentUser returning null - no session',data:{reason:sessionError?'error':'no session'},timestamp:Date.now(),runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         return null;
       }
 
       const result = await this.getById(session.user.id);
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/1b0a61d3-a8a5-4c1e-b6a4-a1942dbb7e28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'supabase-api.ts:84',message:'getCurrentUser final result',data:{hasResult:!!result,resultId:result?.id,resultUsername:result?.username,elapsed:Date.now()-startTime},timestamp:Date.now(),runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
+      
+      // 세션은 있지만 users 테이블에 사용자가 없으면 세션 무효화하고 null 반환
+      if (!result) {
+        // 잘못된 세션 정리
+        await supabase.auth.signOut();
+        return null;
+      }
+      
       return result;
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7242/ingest/1b0a61d3-a8a5-4c1e-b6a4-a1942dbb7e28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'supabase-api.ts:87',message:'getCurrentUser exception',data:{errorMessage:error instanceof Error?error.message:String(error)},timestamp:Date.now(),runId:'post-fix',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       console.error('Error getting current user:', error);
       return null;
     }

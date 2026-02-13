@@ -19,8 +19,19 @@ export default function Header() {
   const [user, setUser] = useState<UserType | null>(null);
 
   useEffect(() => {
-    authApi.getCurrentUser().then(setUser);
-    const { data } = authApi.onAuthStateChange((u) => setUser(u));
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/1b0a61d3-a8a5-4c1e-b6a4-a1942dbb7e28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Header.tsx:21',message:'Header useEffect started',data:{timestamp:Date.now()},timestamp:Date.now(),runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    
+    // onAuthStateChange가 초기 세션도 처리하므로 이것만 사용
+    // INITIAL_SESSION 이벤트로 초기 상태를 빠르게 설정
+    const { data } = authApi.onAuthStateChange((u) => {
+      // #region agent log
+      fetch('http://127.0.0.1:7242/ingest/1b0a61d3-a8a5-4c1e-b6a4-a1942dbb7e28',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'Header.tsx:26',message:'onAuthStateChange callback',data:{user:u?{id:u.id,username:u.username,role:u.role}:null,isNull:u===null},timestamp:Date.now(),runId:'post-fix',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      setUser(u);
+    });
+    
     const sub = data?.subscription;
     return () => sub?.unsubscribe?.();
   }, []);

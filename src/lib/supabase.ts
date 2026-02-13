@@ -9,6 +9,22 @@ if (!url || !key) {
   );
 }
 
+// AbortError 방지를 위한 커스텀 fetch 래퍼
+const customFetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+  // signal을 완전히 제거하고 새로운 Request 객체 생성
+  const { signal, ...restInit } = init ?? {};
+  
+  // Request 객체인 경우 URL만 추출
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+  
+  // signal 없이 새로운 fetch 요청 생성
+  return fetch(url, {
+    ...restInit,
+    // signal을 명시적으로 undefined로 설정하여 완전히 제거
+    signal: undefined,
+  });
+};
+
 export const supabase: SupabaseClient<Database> = createClient<Database>(url, key, {
   auth: {
     persistSession: true,
@@ -21,10 +37,7 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(url, ke
     },
   } as Record<string, unknown>,
   global: {
-    fetch: (input: RequestInfo | URL, init?: RequestInit) => {
-      const { signal: _signal, ...rest } = init ?? {};
-      return fetch(input, rest);
-    },
+    fetch: customFetch,
   },
 });
 

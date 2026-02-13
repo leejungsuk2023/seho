@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import type { User } from '../app/data/mockData';
 import { usersApi } from './supabase-api';
+import { retryOnAbortError } from './supabase-retry';
 
 // ============================================
 // 인증 관련 유틸리티 함수
@@ -14,16 +15,18 @@ export const authApi = {
   }): Promise<{ user: User | null; error: Error | null }> {
     try {
       // Supabase Auth에 사용자 생성
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username: userData.username,
-            nickname: userData.nickname,
+      const { data: authData, error: authError } = await retryOnAbortError(() =>
+        supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              username: userData.username,
+              nickname: userData.nickname,
+            },
           },
-        },
-      });
+        })
+      );
 
       if (authError) {
         return { user: null, error: authError };
@@ -51,10 +54,12 @@ export const authApi = {
   // 이메일/비밀번호로 로그인
   async signIn(email: string, password: string): Promise<{ user: User | null; error: Error | null }> {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data, error } = await retryOnAbortError(() =>
+        supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+      );
 
       if (error) {
         return { user: null, error };
@@ -97,8 +102,14 @@ export const authApi = {
 
   // 현재 세션 확인
   async getSession() {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    return { session, error };
+    try {
+      const { data: { session }, error } = await retryOnAbortError(() =>
+        supabase.auth.getSession()
+      );
+      return { session, error };
+    } catch (error) {
+      return { session: null, error: error as Error };
+    }
   },
 
   // 현재 사용자 정보 가져오기

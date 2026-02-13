@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import type { User, Blog, Category, Post, Comment, PostStatus, UserRole } from '../app/data/mockData';
+import { retryOnAbortError } from './supabase-retry';
 
 function mapCategoryFromDb(dbCat: any): Category {
   return {
@@ -33,18 +34,25 @@ export const usersApi = {
 
   // 사용자 ID로 조회
   async getById(id: string): Promise<User | null> {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', id)
-      .single();
+    try {
+      const { data, error } = await retryOnAbortError(() =>
+        supabase
+          .from('users')
+          .select('*')
+          .eq('id', id)
+          .single()
+      );
 
-    if (error) {
-      console.error('Error fetching user:', error);
+      if (error) {
+        console.error('Error fetching user:', error);
+        return null;
+      }
+
+      return data ? mapUserFromDb(data) : null;
+    } catch (error) {
+      console.error('Error fetching user (after retry):', error);
       return null;
     }
-
-    return data ? mapUserFromDb(data) : null;
   },
 
   // 사용자명으로 조회
@@ -65,10 +73,18 @@ export const usersApi = {
 
   // 현재 로그인한 사용자 조회
   async getCurrentUser(): Promise<User | null> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    try {
+      const { data: { user }, error } = await retryOnAbortError(
+        () => supabase.auth.getUser()
+      );
+      
+      if (error || !user) return null;
 
-    return this.getById(user.id);
+      return await retryOnAbortError(() => this.getById(user.id));
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
   },
 
   // 사용자 생성 (id 지정 시 Supabase Auth 사용자와 동기화용)
@@ -82,29 +98,36 @@ export const usersApi = {
     bio?: string;
     role?: UserRole;
   }): Promise<User | null> {
-    const insertData: Record<string, unknown> = {
-      username: userData.username,
-      nickname: userData.nickname,
-      email: userData.email || null,
-      birthdate: userData.birthdate || null,
-      profile_image: userData.profileImage || null,
-      bio: userData.bio || null,
-      role: userData.role || 'VIEWER',
-    };
-    if (userData.id) insertData.id = userData.id;
+    try {
+      const insertData: Record<string, unknown> = {
+        username: userData.username,
+        nickname: userData.nickname,
+        email: userData.email || null,
+        birthdate: userData.birthdate || null,
+        profile_image: userData.profileImage || null,
+        bio: userData.bio || null,
+        role: userData.role || 'VIEWER',
+      };
+      if (userData.id) insertData.id = userData.id;
 
-    const { data, error } = await supabase
-      .from('users')
-      .insert(insertData)
-      .select()
-      .single();
+      const { data, error } = await retryOnAbortError(() =>
+        supabase
+          .from('users')
+          .insert(insertData)
+          .select()
+          .single()
+      );
 
-    if (error) {
-      console.error('Error creating user:', error);
+      if (error) {
+        console.error('Error creating user:', error);
+        return null;
+      }
+
+      return data ? mapUserFromDb(data) : null;
+    } catch (error) {
+      console.error('Error creating user (after retry):', error);
       return null;
     }
-
-    return data ? mapUserFromDb(data) : null;
   },
 
   // 사용자 업데이트
@@ -139,20 +162,27 @@ export const usersApi = {
 export const blogsApi = {
   // 모든 블로그 조회
   async getAll(): Promise<Blog[]> {
-    const { data, error } = await supabase
-      .from('blogs')
-      .select(`
-        *,
-        categories (*)
-      `)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await retryOnAbortError(() =>
+        supabase
+          .from('blogs')
+          .select(`
+            *,
+            categories (*)
+          `)
+          .order('created_at', { ascending: false })
+      );
 
-    if (error) {
-      console.error('Error fetching blogs:', error);
+      if (error) {
+        console.error('Error fetching blogs:', error);
+        return [];
+      }
+
+      return data.map(mapBlogFromDb);
+    } catch (error) {
+      console.error('Error fetching blogs (after retry):', error);
       return [];
     }
-
-    return data.map(mapBlogFromDb);
   },
 
   // Slug로 블로그 조회

@@ -43,6 +43,10 @@ export const authApi = {
       );
 
       if (authError) {
+        // "User already registered" 에러인 경우 로그인으로 안내
+        if (authError.message?.includes('already registered') || authError.message?.includes('already exists')) {
+          return { user: null, error: new Error('이미 가입된 이메일입니다. 로그인을 시도해주세요.') };
+        }
         return { user: null, error: authError };
       }
 
@@ -50,7 +54,18 @@ export const authApi = {
         return { user: null, error: new Error('사용자 생성에 실패했습니다.') };
       }
 
-      // users 테이블에 사용자 정보 생성 (Auth 사용자 id와 동일하게)
+      // signUp 후 세션이 완전히 설정되도록 명시적으로 signIn
+      // (RLS 정책이 auth.uid()를 확인하므로 세션이 반드시 필요)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        return { user: null, error: new Error('계정은 생성되었으나 자동 로그인에 실패했습니다. 로그인 페이지에서 로그인해주세요.') };
+      }
+
+      // 세션이 확실히 활성화된 상태에서 users 테이블에 사용자 정보 생성
       const user = await usersApi.create({
         id: authData.user.id,
         username: userData.username,
@@ -58,6 +73,17 @@ export const authApi = {
         email,
         role: 'VIEWER',
       });
+
+      if (!user) {
+        return { user: null, error: new Error('회원 정보 저장에 실패했습니다. 로그인을 시도하면 자동으로 복구됩니다.') };
+      }
+
+      // 가입 완료 후 세션 정리 (로그인 페이지로 보내므로)
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        forceCleanSession();
+      }
 
       return { user, error: null };
     } catch (error) {

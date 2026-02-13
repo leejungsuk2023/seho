@@ -99,15 +99,13 @@ export default function Register() {
     });
     setLoading(false);
 
-    if (error) {
-      toast.error(error.message || '회원가입에 실패했습니다');
+    if (error || !user) {
+      toast.error(error?.message || '회원가입에 실패했습니다. 다시 시도해주세요.');
       return;
     }
 
-    if (user) {
-      toast.success('회원가입이 완료되었습니다!');
-      navigate('/auth/login');
-    }
+    toast.success('회원가입이 완료되었습니다!');
+    navigate('/auth/login');
   };
 
   const passwordStrength = getPasswordStrength();

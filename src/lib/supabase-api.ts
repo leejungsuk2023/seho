@@ -34,25 +34,19 @@ export const usersApi = {
 
   // 사용자 ID로 조회
   async getById(id: string): Promise<User | null> {
-    try {
-      const { data, error } = await retryOnAbortError(() =>
-        supabase
-          .from('users')
-          .select('*')
-          .eq('id', id)
-          .single()
-      );
+    // 재시도 로직 제거 - 일반적인 조회는 빠르게 처리
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-      if (error) {
-        console.error('Error fetching user:', error);
-        return null;
-      }
-
-      return data ? mapUserFromDb(data) : null;
-    } catch (error) {
-      console.error('Error fetching user (after retry):', error);
+    if (error) {
+      console.error('Error fetching user:', error);
       return null;
     }
+
+    return data ? mapUserFromDb(data) : null;
   },
 
   // 사용자명으로 조회
@@ -74,13 +68,11 @@ export const usersApi = {
   // 현재 로그인한 사용자 조회
   async getCurrentUser(): Promise<User | null> {
     try {
-      const { data: { user }, error } = await retryOnAbortError(
-        () => supabase.auth.getUser()
-      );
+      const { data: { user }, error } = await supabase.auth.getUser();
       
       if (error || !user) return null;
 
-      return await retryOnAbortError(() => this.getById(user.id));
+      return this.getById(user.id);
     } catch (error) {
       console.error('Error getting current user:', error);
       return null;
@@ -110,6 +102,7 @@ export const usersApi = {
       };
       if (userData.id) insertData.id = userData.id;
 
+      // 재시도 로직 적용 (중요한 작업)
       const { data, error } = await retryOnAbortError(() =>
         supabase
           .from('users')
@@ -160,10 +153,11 @@ export const usersApi = {
 // ============================================
 
 export const blogsApi = {
-  // 모든 블로그 조회
+  // 모든 블로그 조회 (포스트 수 포함)
   async getAll(): Promise<Blog[]> {
     try {
-      const { data, error } = await retryOnAbortError(() =>
+      // 블로그와 카테고리를 한 번에 조회
+      const { data: blogsData, error: blogsError } = await retryOnAbortError(() =>
         supabase
           .from('blogs')
           .select(`
@@ -173,12 +167,37 @@ export const blogsApi = {
           .order('created_at', { ascending: false })
       );
 
-      if (error) {
-        console.error('Error fetching blogs:', error);
+      if (blogsError) {
+        console.error('Error fetching blogs:', blogsError);
         return [];
       }
 
-      return data.map(mapBlogFromDb);
+      if (!blogsData || blogsData.length === 0) {
+        return [];
+      }
+
+      // 모든 블로그의 포스트 수를 한 번의 쿼리로 조회
+      const blogIds = blogsData.map(blog => blog.id);
+      const { data: postsData, error: postsError } = await supabase
+        .from('posts')
+        .select('blog_id')
+        .eq('status', 'PUBLISHED')
+        .in('blog_id', blogIds);
+
+      // blog_id별로 포스트 수 계산
+      const postCounts: Record<string, number> = {};
+      if (postsData) {
+        postsData.forEach(post => {
+          postCounts[post.blog_id] = (postCounts[post.blog_id] || 0) + 1;
+        });
+      }
+
+      // 블로그 데이터에 포스트 수 추가
+      return blogsData.map(blog => {
+        const blogWithCount = mapBlogFromDb(blog);
+        blogWithCount.postCount = postCounts[blog.id] || 0;
+        return blogWithCount;
+      });
     } catch (error) {
       console.error('Error fetching blogs (after retry):', error);
       return [];

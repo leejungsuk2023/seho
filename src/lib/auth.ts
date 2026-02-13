@@ -14,7 +14,7 @@ export const authApi = {
     nickname: string;
   }): Promise<{ user: User | null; error: Error | null }> {
     try {
-      // Supabase Auth에 사용자 생성
+      // Supabase Auth에 사용자 생성 (재시도 적용)
       const { data: authData, error: authError } = await retryOnAbortError(() =>
         supabase.auth.signUp({
           email,
@@ -54,6 +54,7 @@ export const authApi = {
   // 이메일/비밀번호로 로그인
   async signIn(email: string, password: string): Promise<{ user: User | null; error: Error | null }> {
     try {
+      // 로그인은 재시도 적용 (중요한 작업)
       const { data, error } = await retryOnAbortError(() =>
         supabase.auth.signInWithPassword({
           email,
@@ -102,14 +103,9 @@ export const authApi = {
 
   // 현재 세션 확인
   async getSession() {
-    try {
-      const { data: { session }, error } = await retryOnAbortError(() =>
-        supabase.auth.getSession()
-      );
-      return { session, error };
-    } catch (error) {
-      return { session: null, error: error as Error };
-    }
+    // 세션 확인은 빠르게 처리 (재시도 불필요)
+    const { data: { session }, error } = await supabase.auth.getSession();
+    return { session, error };
   },
 
   // 현재 사용자 정보 가져오기

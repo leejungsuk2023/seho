@@ -14,18 +14,9 @@ export default function Home() {
     async function fetchBlogs() {
       try {
         setLoading(true);
+        // getAll()이 이미 포스트 수를 포함하여 반환
         const data = await blogsApi.getAll();
-        // 포스트 수 계산 (각 블로그별로)
-        const blogsWithCounts = await Promise.all(
-          data.map(async (blog) => {
-            const posts = await postsApi.getByBlogId(blog.id, { status: 'PUBLISHED' });
-            return {
-              ...blog,
-              postCount: posts.length,
-            };
-          })
-        );
-        setBlogs(blogsWithCounts);
+        setBlogs(data);
       } catch (err) {
         setError('블로그를 불러오는 중 오류가 발생했습니다.');
         console.error('Error fetching blogs:', err);

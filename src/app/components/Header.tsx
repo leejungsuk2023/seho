@@ -73,6 +73,11 @@ export default function Header() {
               마이페이지
             </Link>
           )}
+          {user?.role === 'ADMIN' && (
+            <Link to="/admin" className="text-sm font-medium hover:text-blue-600 transition-colors">
+              관리자
+            </Link>
+          )}
         </nav>
 
         {/* Search and Auth */}
@@ -184,6 +189,15 @@ export default function Header() {
                     북스토어
                   </Link>
                 </div>
+                {user?.role === 'ADMIN' && (
+                  <Link
+                    to="/admin"
+                    className="text-sm font-medium hover:text-blue-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    관리자
+                  </Link>
+                )}
                 {/* Mobile Search */}
                 <form onSubmit={handleSearch} className="border-t pt-4">
                   <input

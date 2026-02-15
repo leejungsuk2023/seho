@@ -16,6 +16,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '../components/ui/dialog';
 import { toast } from 'sonner';
@@ -34,6 +35,10 @@ export default function MyPage() {
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [userComments, setUserComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordChanging, setPasswordChanging] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -91,10 +96,6 @@ export default function MyPage() {
   }
 
   const isOwnPage = currentUser?.id === user.id;
-  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordChanging, setPasswordChanging] = useState(false);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -192,6 +193,7 @@ export default function MyPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>비밀번호 변경</DialogTitle>
+              <DialogDescription className="sr-only">새 비밀번호를 입력하세요</DialogDescription>
             </DialogHeader>
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div>

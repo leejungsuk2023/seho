@@ -115,6 +115,16 @@ export const authApi = {
     }
   },
 
+  // 비밀번호 변경
+  async updatePassword(newPassword: string): Promise<{ error: Error | null }> {
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      return { error };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  },
+
   // 로그아웃
   async signOut(): Promise<{ error: Error | null }> {
     try {

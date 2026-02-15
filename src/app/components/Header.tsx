@@ -28,7 +28,6 @@ export default function Header() {
 
   const handleLogout = async () => {
     await authApi.signOut();
-    setUser(null);
     navigate('/');
   };
 
@@ -99,15 +98,17 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/my-page">마이페이지</Link>
+                <DropdownMenuItem onSelect={() => navigate('/my-page')}>
+                  마이페이지
                 </DropdownMenuItem>
                 {user.role === 'ADMIN' && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin">관리자 대시보드</Link>
+                  <DropdownMenuItem onSelect={() => navigate('/admin')}>
+                    관리자 대시보드
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={handleLogout}>로그아웃</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleLogout()}>
+                  로그아웃
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
@@ -181,15 +182,30 @@ export default function Header() {
                   />
                 </form>
                 {/* Mobile Auth */}
-                {!user && (
-                  <div className="border-t pt-4">
+                <div className="border-t pt-4">
+                  {user ? (
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs text-gray-500">{user.nickname}님</p>
+                      <Button variant="outline" asChild className="w-full" onClick={() => setMobileMenuOpen(false)}>
+                        <Link to="/my-page">마이페이지</Link>
+                      </Button>
+                      {user.role === 'ADMIN' && (
+                        <Button variant="outline" asChild className="w-full" onClick={() => setMobileMenuOpen(false)}>
+                          <Link to="/admin">관리자 대시보드</Link>
+                        </Button>
+                      )}
+                      <Button variant="outline" className="w-full" onClick={() => { setMobileMenuOpen(false); handleLogout(); }}>
+                        로그아웃
+                      </Button>
+                    </div>
+                  ) : (
                     <Button asChild className="w-full">
                       <Link to="/auth/login" onClick={() => setMobileMenuOpen(false)}>
                         로그인
                       </Link>
                     </Button>
-                  </div>
-                )}
+                  )}
+                </div>
               </nav>
             </SheetContent>
           </Sheet>

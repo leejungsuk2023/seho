@@ -1,13 +1,24 @@
 import { useParams, Link, useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../lib/AuthContext';
+import { authApi } from '../../lib/auth';
 import { usersApi, postsApi, commentsApi, blogsApi } from '../../lib/supabase-api';
 import type { User, Post, Comment, Blog } from '../data/mockData';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
-import { Eye, MessageCircle, Calendar } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Eye, MessageCircle, Calendar, LogOut, KeyRound } from 'lucide-react';
 import Pagination from '../components/Pagination';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '../components/ui/dialog';
+import { toast } from 'sonner';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -80,6 +91,38 @@ export default function MyPage() {
   }
 
   const isOwnPage = currentUser?.id === user.id;
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordChanging, setPasswordChanging] = useState(false);
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast.error('비밀번호는 8자 이상이어야 합니다');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('비밀번호가 일치하지 않습니다');
+      return;
+    }
+    setPasswordChanging(true);
+    const { error } = await authApi.updatePassword(newPassword);
+    setPasswordChanging(false);
+    if (error) {
+      toast.error(error.message || '비밀번호 변경에 실패했습니다');
+      return;
+    }
+    toast.success('비밀번호가 변경되었습니다');
+    setPasswordDialogOpen(false);
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+
+  const handleLogout = async () => {
+    await authApi.signOut();
+    navigate('/');
+  };
 
   const totalPostsPages = Math.ceil(userPosts.length / ITEMS_PER_PAGE) || 1;
   const paginatedPosts = userPosts.slice(
@@ -130,12 +173,63 @@ export default function MyPage() {
             </div>
           </div>
           {isOwnPage && (
-            <div className="flex-shrink-0">
-              <Button variant="outline">프로필 수정</Button>
+            <div className="flex-shrink-0 flex flex-col gap-2">
+              <Button variant="outline" size="sm" onClick={() => setPasswordDialogOpen(true)} className="gap-2">
+                <KeyRound className="w-4 h-4" />
+                비밀번호 변경
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50">
+                <LogOut className="w-4 h-4" />
+                로그아웃
+              </Button>
             </div>
           )}
         </div>
       </Card>
+
+      {isOwnPage && (
+        <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>비밀번호 변경</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div>
+                <Label htmlFor="newPassword">새 비밀번호</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="8자 이상, 영문+숫자"
+                  className="mt-1"
+                  autoComplete="new-password"
+                />
+              </div>
+              <div>
+                <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="비밀번호를 다시 입력"
+                  className="mt-1"
+                  autoComplete="new-password"
+                />
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setPasswordDialogOpen(false)}>
+                  취소
+                </Button>
+                <Button type="submit" disabled={passwordChanging}>
+                  {passwordChanging ? '변경 중...' : '변경하기'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
         <TabsList className="mb-6">

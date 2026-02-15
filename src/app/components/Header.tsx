@@ -47,6 +47,11 @@ export default function Header() {
           <Link to="/on-air" className="text-sm font-medium hover:text-blue-600 transition-colors">
             On Air
           </Link>
+          {user && (
+            <Link to="/my-page" className="text-sm font-medium hover:text-blue-600 transition-colors">
+              마이페이지
+            </Link>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="text-sm font-medium hover:text-blue-600 transition-colors">
@@ -90,14 +95,14 @@ export default function Header() {
 
           {/* Auth Buttons */}
           {user ? (
-            <DropdownMenu>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="gap-2">
                   <User className="w-4 h-4" />
                   <span className="hidden md:inline">{user.nickname}</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="z-[100]">
                 <DropdownMenuItem onSelect={() => navigate('/my-page')}>
                   마이페이지
                 </DropdownMenuItem>

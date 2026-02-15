@@ -2,7 +2,7 @@ import { useParams, useNavigate, Link } from 'react-router';
 import { useState, useEffect } from 'react';
 import { flattenCategories } from '../data/mockData';
 import { blogsApi, postsApi } from '../../lib/supabase-api';
-import { authApi } from '../../lib/auth';
+import { useAuth } from '../../lib/AuthContext';
 import type { Blog, Post } from '../data/mockData';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -31,19 +31,11 @@ export default function WritePost() {
   const [tags, setTags] = useState('');
   const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED'>('PUBLISHED');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
-  const [currentUser, setCurrentUser] = useState<{ id: string; role: string } | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
-
-  useEffect(() => {
-    authApi.getCurrentUser().then((u) => {
-      setCurrentUser(u ?? null);
-      setAuthChecked(true);
-    });
-  }, []);
+  const { user: currentUser, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!slug || !authChecked) return;
+      if (!slug || authLoading) return;
 
       if (!currentUser || (currentUser.role !== 'WRITER' && currentUser.role !== 'ADMIN')) {
         toast.error('작성 권한이 없습니다');
@@ -82,9 +74,9 @@ export default function WritePost() {
     };
 
     fetchData();
-  }, [slug, postId, currentUser, authChecked, navigate]);
+  }, [slug, postId, currentUser, authLoading, navigate]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <p className="text-gray-600">로딩 중...</p>

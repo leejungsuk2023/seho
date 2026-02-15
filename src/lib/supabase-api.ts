@@ -51,6 +51,23 @@ export const usersApi = {
     return data ? mapUserFromDb(data) : null;
   },
 
+  // 여러 ID로 사용자 일괄 조회 (N+1 방지)
+  async getByIds(ids: string[]): Promise<Record<string, User>> {
+    const unique = [...new Set(ids)].filter(Boolean);
+    if (unique.length === 0) return {};
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .in('id', unique);
+    if (error) {
+      console.error('Error fetching users by ids:', error);
+      return {};
+    }
+    const map: Record<string, User> = {};
+    (data || []).forEach((row) => { map[row.id] = mapUserFromDb(row); });
+    return map;
+  },
+
   // 사용자명으로 조회
   async getByUsername(username: string): Promise<User | null> {
     const { data, error } = await supabase
@@ -179,14 +196,10 @@ export const blogsApi = {
   // 모든 블로그 조회 (포스트 수 포함)
   async getAll(): Promise<Blog[]> {
     try {
-      // 블로그와 카테고리를 한 번에 조회
       const { data: blogsData, error: blogsError } = await retryOnAbortError(() =>
         supabase
           .from('blogs')
-          .select(`
-            *,
-            categories (*)
-          `)
+          .select('*, categories (*)')
           .order('created_at', { ascending: false })
       );
 
@@ -199,21 +212,17 @@ export const blogsApi = {
         return [];
       }
 
-      // 모든 블로그의 포스트 수를 한 번의 쿼리로 조회
-      const blogIds = blogsData.map(blog => blog.id);
-      const { data: postsData, error: postsError } = await supabase
+      const blogIds = blogsData.map((blog) => blog.id);
+      const { data: postsData } = await supabase
         .from('posts')
         .select('blog_id')
         .eq('status', 'PUBLISHED')
         .in('blog_id', blogIds);
 
-      // blog_id별로 포스트 수 계산
       const postCounts: Record<string, number> = {};
-      if (postsData) {
-        postsData.forEach(post => {
-          postCounts[post.blog_id] = (postCounts[post.blog_id] || 0) + 1;
-        });
-      }
+      (postsData || []).forEach((post) => {
+        postCounts[post.blog_id] = (postCounts[post.blog_id] || 0) + 1;
+      });
 
       // 블로그 데이터에 포스트 수 추가
       return blogsData.map(blog => {
@@ -244,6 +253,23 @@ export const blogsApi = {
     }
 
     return data ? mapBlogFromDb(data) : null;
+  },
+
+  // 여러 ID로 블로그 일괄 조회 (N+1 방지)
+  async getByIds(ids: string[]): Promise<Record<string, Blog>> {
+    const unique = [...new Set(ids)].filter(Boolean);
+    if (unique.length === 0) return {};
+    const { data, error } = await supabase
+      .from('blogs')
+      .select(`*, categories (*)`)
+      .in('id', unique);
+    if (error) {
+      console.error('Error fetching blogs by ids:', error);
+      return {};
+    }
+    const map: Record<string, Blog> = {};
+    (data || []).forEach((row) => { map[row.id] = mapBlogFromDb(row); });
+    return map;
   },
 
   // ID로 블로그 조회

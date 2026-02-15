@@ -1,7 +1,7 @@
 import { useParams } from 'react-router';
 import { useState, useEffect } from 'react';
-import { blogsApi, postsApi } from '../../lib/supabase-api';
-import { authApi } from '../../lib/auth';
+import { blogsApi, postsApi, usersApi } from '../../lib/supabase-api';
+import { useAuth } from '../../lib/AuthContext';
 import { flattenCategories } from '../data/mockData';
 import type { Blog, Post } from '../data/mockData';
 import PostCard from '../components/PostCard';
@@ -24,14 +24,11 @@ export default function BlogHome() {
   const { slug } = useParams<{ slug: string }>();
   const [blog, setBlog] = useState<Blog | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [authorsMap, setAuthorsMap] = useState<Record<string, import('../data/mockData').User>>({});
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [currentUser, setCurrentUser] = useState<{ id: string; role: string } | null>(null);
-
-  useEffect(() => {
-    authApi.getCurrentUser().then((u) => setCurrentUser(u ?? null));
-  }, []);
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     async function fetchData() {
@@ -46,12 +43,15 @@ export default function BlogHome() {
         }
         
         setBlog(blogData);
-        
-        // 포스트 가져오기
+
         const postsData = await postsApi.getByBlogId(blogData.id, {
           status: 'PUBLISHED',
         });
         setPosts(postsData);
+
+        const authorIds = [...new Set(postsData.map((p) => p.authorId))];
+        const users = await usersApi.getByIds(authorIds);
+        setAuthorsMap(users);
       } catch (error) {
         console.error('Error fetching blog data:', error);
       } finally {
@@ -173,8 +173,13 @@ export default function BlogHome() {
         {paginatedPosts.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedPosts.map((post) => (
-                <PostCard key={post.id} post={post} />
+                {paginatedPosts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  author={authorsMap[post.authorId] ?? null}
+                  blog={blog}
+                />
               ))}
             </div>
 

@@ -9,13 +9,22 @@ import { Badge } from './ui/badge';
 interface PostCardProps {
   post: Post;
   showBlogBadge?: boolean;
+  /** 사전 조회된 author (제공 시 API 호출 생략) */
+  author?: User | null;
+  /** 사전 조회된 blog (제공 시 API 호출 생략) */
+  blog?: Blog | null;
 }
 
-export default function PostCard({ post, showBlogBadge = false }: PostCardProps) {
-  const [author, setAuthor] = useState<User | null>(null);
-  const [blog, setBlog] = useState<Blog | null>(null);
+export default function PostCard({ post, showBlogBadge = false, author: authorProp, blog: blogProp }: PostCardProps) {
+  const [author, setAuthor] = useState<User | null>(authorProp ?? null);
+  const [blog, setBlog] = useState<Blog | null>(blogProp ?? null);
 
   useEffect(() => {
+    if (authorProp !== undefined && blogProp !== undefined) {
+      setAuthor(authorProp);
+      setBlog(blogProp);
+      return;
+    }
     async function fetchData() {
       const [authorData, blogData] = await Promise.all([
         usersApi.getById(post.authorId),
@@ -25,7 +34,7 @@ export default function PostCard({ post, showBlogBadge = false }: PostCardProps)
       setBlog(blogData);
     }
     fetchData();
-  }, [post.authorId, post.blogId]);
+  }, [post.authorId, post.blogId, authorProp, blogProp]);
 
   if (!author || !blog) {
     return (

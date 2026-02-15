@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { blogsApi, postsApi } from '../../lib/supabase-api';
+import { blogsApi, postsApi, usersApi } from '../../lib/supabase-api';
 import { flattenCategories } from '../data/mockData';
 import type { Blog, Post } from '../data/mockData';
 import PostCard from '../components/PostCard';
@@ -20,6 +20,8 @@ const POSTS_PER_PAGE = 12;
 export default function OnAir() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [authorsMap, setAuthorsMap] = useState<Record<string, import('../data/mockData').User>>({});
+  const [blogsMap, setBlogsMap] = useState<Record<string, Blog>>({});
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
@@ -30,17 +32,26 @@ export default function OnAir() {
     async function fetchData() {
       try {
         setLoading(true);
-        const blogsData = await blogsApi.getAll();
+        const [blogsData, postsData] = await Promise.all([
+          blogsApi.getAll(),
+          postsApi.getAll({ status: 'PUBLISHED' }),
+        ]);
         setBlogs(blogsData);
-        
-        // 초기 선택: 모든 블로그 선택
-        if (blogsData.length > 0 && selectedBlogs.length === 0) {
-          setSelectedBlogs(blogsData.map(b => b.id));
-        }
-        
-        // 모든 포스트 가져오기
-        const postsData = await postsApi.getAll({ status: 'PUBLISHED' });
         setPosts(postsData);
+
+        if (blogsData.length > 0) {
+          setSelectedBlogs((prev) => (prev.length === 0 ? blogsData.map((b) => b.id) : prev));
+        }
+
+        // author/blog 일괄 조회 (N+1 방지)
+        const authorIds = [...new Set(postsData.map((p) => p.authorId))];
+        const blogIds = [...new Set(postsData.map((p) => p.blogId))];
+        const [users, blogsById] = await Promise.all([
+          usersApi.getByIds(authorIds),
+          blogsApi.getByIds(blogIds),
+        ]);
+        setAuthorsMap(users);
+        setBlogsMap(blogsById);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -223,7 +234,13 @@ export default function OnAir() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {paginatedPosts.map((post) => (
-                  <PostCard key={post.id} post={post} showBlogBadge />
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    showBlogBadge
+                    author={authorsMap[post.authorId] ?? null}
+                    blog={blogsMap[post.blogId] ?? null}
+                  />
                 ))}
               </div>
 

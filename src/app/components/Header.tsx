@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router';
 import { Search, Menu, User } from 'lucide-react';
 import { Button } from './ui/button';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,24 +10,13 @@ import {
 } from './ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { authApi } from '../../lib/auth';
-import type { User as UserType } from '../data/mockData';
+import { useAuth } from '../../lib/AuthContext';
 
 export default function Header() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<UserType | null>(null);
-
-  useEffect(() => {
-    // onAuthStateChange가 초기 세션도 처리하므로 이것만 사용
-    // INITIAL_SESSION 이벤트로 초기 상태를 빠르게 설정
-    const { data } = authApi.onAuthStateChange((u) => {
-      setUser(u);
-    });
-    
-    const sub = data?.subscription;
-    return () => sub?.unsubscribe?.();
-  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

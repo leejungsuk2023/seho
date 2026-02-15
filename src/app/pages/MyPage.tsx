@@ -1,6 +1,6 @@
 import { useParams, Link, useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
-import { authApi } from '../../lib/auth';
+import { useAuth } from '../../lib/AuthContext';
 import { usersApi, postsApi, commentsApi, blogsApi } from '../../lib/supabase-api';
 import type { User, Post, Comment, Blog } from '../data/mockData';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
@@ -18,25 +18,22 @@ export default function MyPage() {
   const [postsPage, setPostsPage] = useState(1);
   const [commentsPage, setCommentsPage] = useState(1);
 
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const { user: currentUser, loading: authLoading } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [userComments, setUserComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const userId = id || currentUser?.id;
-
   useEffect(() => {
     const load = async () => {
-      const me = await authApi.getCurrentUser();
-      setCurrentUser(me);
+      if (authLoading) return;
 
-      if (!me && !id) {
+      if (!currentUser && !id) {
         setLoading(false);
         return;
       }
 
-      const targetId = id || me?.id;
+      const targetId = id || currentUser?.id;
       if (!targetId) {
         setLoading(false);
         return;
@@ -55,7 +52,7 @@ export default function MyPage() {
     };
 
     load();
-  }, [id]);
+  }, [id, currentUser, authLoading]);
 
   useEffect(() => {
     if (!currentUser && !id && !loading) {
@@ -63,7 +60,7 @@ export default function MyPage() {
     }
   }, [currentUser, id, loading, navigate]);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <p className="text-gray-600">로딩 중...</p>

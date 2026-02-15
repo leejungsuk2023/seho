@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
 import { postsApi, usersApi, blogsApi, commentsApi } from '../../lib/supabase-api';
-import { authApi } from '../../lib/auth';
+import { useAuth } from '../../lib/AuthContext';
 import { getRelativeTime } from '../data/mockData';
 import type { Post, User, Blog, Comment } from '../data/mockData';
 import { Eye, MessageCircle, Calendar, Edit, Trash2 } from 'lucide-react';
@@ -20,11 +20,7 @@ export default function PostDetail() {
   const [commentAuthors, setCommentAuthors] = useState<Map<string, User>>(new Map());
   const [commentText, setCommentText] = useState('');
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    authApi.getCurrentUser().then(setCurrentUser);
-  }, []);
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     async function fetchData() {
@@ -53,18 +49,11 @@ export default function PostDetail() {
         setAuthor(authorData);
         setBlog(blogData);
         setComments(commentsData);
-        
-        // 댓글 작성자 정보 가져오기
-        const authorMap = new Map<string, User>();
-        await Promise.all(
-          commentsData.map(async (comment) => {
-            const author = await usersApi.getById(comment.authorId);
-            if (author) {
-              authorMap.set(comment.authorId, author);
-            }
-          })
-        );
-        setCommentAuthors(authorMap);
+
+        // 댓글 작성자 일괄 조회 (N+1 방지)
+        const commentAuthorIds = [...new Set(commentsData.map((c) => c.authorId))];
+        const commentAuthorsData = await usersApi.getByIds(commentAuthorIds);
+        setCommentAuthors(new Map(Object.entries(commentAuthorsData)));
       } catch (error) {
         console.error('Error fetching post data:', error);
       } finally {

@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
 import { getRelativeTime, flattenCategories } from '../data/mockData';
 import { usersApi, postsApi, commentsApi, blogsApi, categoriesApi } from '../../lib/supabase-api';
-import { authApi } from '../../lib/auth';
+import { useAuth } from '../../lib/AuthContext';
 import type { User, Post, Comment, Blog, Category } from '../data/mockData';
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -38,8 +38,7 @@ export default function AdminDashboard() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const { user: currentUser, loading: authLoading } = useAuth();
   const [postsPage, setPostsPage] = useState(1);
   const [commentsPage, setCommentsPage] = useState(1);
 
@@ -47,14 +46,11 @@ export default function AdminDashboard() {
   const COMMENTS_PER_PAGE = 10;
 
   useEffect(() => {
-    authApi.getCurrentUser().then((u) => {
-      setCurrentUser(u ?? null);
-      setAuthChecked(true);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!authChecked || currentUser === null) return;
+    if (authLoading) return;
+    if (!currentUser) {
+      navigate('/auth/login');
+      return;
+    }
     if (currentUser.role !== 'ADMIN') {
       toast.error('관리자 권한이 필요합니다');
       navigate('/');
@@ -84,9 +80,9 @@ export default function AdminDashboard() {
     };
 
     fetchData();
-  }, [currentUser, authChecked, navigate]);
+  }, [currentUser, authLoading, navigate]);
 
-  if (!authChecked) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-gray-600">로그인 확인 중...</p>

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router';
-import { Search, Menu, User } from 'lucide-react';
+import { Search, Menu, User, ChevronDown } from 'lucide-react';
 import { Button } from './ui/button';
 import { useState } from 'react';
 import {
@@ -47,11 +47,6 @@ export default function Header() {
           <Link to="/on-air" className="text-sm font-medium hover:text-blue-600 transition-colors">
             On Air
           </Link>
-          {user && (
-            <Link to="/my-page" className="text-sm font-medium hover:text-blue-600 transition-colors">
-              마이페이지
-            </Link>
-          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="text-sm font-medium hover:text-blue-600 transition-colors">
@@ -73,6 +68,11 @@ export default function Header() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          {user && (
+            <Link to="/my-page" className="text-sm font-medium hover:text-blue-600 transition-colors">
+              마이페이지
+            </Link>
+          )}
         </nav>
 
         {/* Search and Auth */}
@@ -93,29 +93,37 @@ export default function Header() {
             </div>
           </form>
 
-          {/* Auth Buttons */}
+          {/* Auth - 서치바 오른쪽: 클릭 시 마이페이지로 이동 */}
           {user ? (
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <User className="w-4 h-4" />
-                  <span className="hidden md:inline">{user.nickname}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="z-[100]">
-                <DropdownMenuItem onSelect={() => navigate('/my-page')}>
-                  마이페이지
-                </DropdownMenuItem>
-                {user.role === 'ADMIN' && (
-                  <DropdownMenuItem onSelect={() => navigate('/admin')}>
-                    관리자 대시보드
+            <div className="hidden md:flex items-center gap-1">
+              <Link
+                to="/my-page"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                <User className="w-4 h-4" />
+                <span className="text-sm font-medium">{user.nickname}</span>
+              </Link>
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="z-[100]">
+                  <DropdownMenuItem onSelect={() => navigate('/my-page')}>
+                    마이페이지
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onSelect={() => handleLogout()}>
-                  로그아웃
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {user.role === 'ADMIN' && (
+                    <DropdownMenuItem onSelect={() => navigate('/admin')}>
+                      관리자 대시보드
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onSelect={() => handleLogout()}>
+                    로그아웃
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           ) : (
             <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
               <Link to="/auth/login">로그인</Link>

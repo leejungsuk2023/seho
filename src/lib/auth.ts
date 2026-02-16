@@ -153,20 +153,34 @@ export const authApi = {
     return await usersApi.getCurrentUser();
   },
 
-  // 세션 변경 감지
+  // 세션 변경 감지 (같은 세션 연속 호출 시 캐시로 중복 요청 방지)
+  _lastSessionId: null as string | null,
+  _lastUser: null as User | null,
   onAuthStateChange(callback: (user: User | null) => void) {
     return supabase.auth.onAuthStateChange(async (event, session) => {
       // 세션이 없거나 사용자가 없으면 null 반환
       if (!session?.user) {
+        authApi._lastSessionId = null;
+        authApi._lastUser = null;
         callback(null);
+        return;
+      }
+      
+      // 같은 세션 연속 호출 시 캐시 사용 (TOKEN_REFRESHED 등)
+      if (authApi._lastSessionId === session.user.id) {
+        callback(authApi._lastUser);
         return;
       }
       
       // 사용자 정보 조회
       const user = await usersApi.getById(session.user.id);
+      authApi._lastSessionId = session.user.id;
+      authApi._lastUser = user ?? null;
       
       // 세션은 있지만 users 테이블에 사용자가 없으면 세션 무효화하고 null 반환
       if (!user) {
+        authApi._lastSessionId = null;
+        authApi._lastUser = null;
         // 잘못된 세션 정리 (배포 환경에서도 작동하도록)
         try {
           await supabase.auth.signOut();

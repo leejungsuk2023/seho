@@ -1,16 +1,19 @@
 import { createBrowserRouter } from "react-router";
+import { lazy } from "react";
 import Root from "./pages/Root";
 import Home from "./pages/Home";
-import BlogHome from "./pages/BlogHome";
-import OnAir from "./pages/OnAir";
-import PostDetail from "./pages/PostDetail";
-import WritePost from "./pages/WritePost";
-import SearchResults from "./pages/SearchResults";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import MyPage from "./pages/MyPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import NotFound from "./pages/NotFound";
+
+// 라우트 lazy loading - 초기 번들 축소로 로딩 속도 개선
+const BlogHome = lazy(() => import("./pages/BlogHome"));
+const OnAir = lazy(() => import("./pages/OnAir"));
+const PostDetail = lazy(() => import("./pages/PostDetail"));
+const WritePost = lazy(() => import("./pages/WritePost"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const MyPage = lazy(() => import("./pages/MyPage"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 export const router = createBrowserRouter([
   {

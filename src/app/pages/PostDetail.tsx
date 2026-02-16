@@ -36,14 +36,13 @@ export default function PostDetail() {
         
         setPost(postData);
         
-        // 조회수 증가
-        await postsApi.incrementViews(id);
-        
-        // 작성자와 블로그 정보 가져오기
+        // 조회수 증가는 비블로킹, 나머지 fetch와 병렬 처리
+        const incrementPromise = postsApi.incrementViews(id);
         const [authorData, blogData, commentsData] = await Promise.all([
           usersApi.getById(postData.authorId),
           blogsApi.getById(postData.blogId),
           commentsApi.getByPostId(id),
+          incrementPromise,
         ]);
         
         setAuthor(authorData);
